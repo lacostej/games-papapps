@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <style>
+    .bg { fill: #f6f1e9; } .wheel { fill: #e9e0d3; } .tile { fill: #fffdf9; } .ink { fill: #2b2622; }
+    .on { fill: #e0673b; } .on-ink { fill: #fff; } .trail { stroke: #e0673b; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #1c1917; } .wheel { fill: #2f2a26; } .tile { fill: #3a3430; } .ink { fill: #f3ede6; }
+      .on { fill: #f07a4f; } .trail { stroke: #f07a4f; }
+    }
+    text { font: 700 13px system-ui, -apple-system, sans-serif; text-anchor: middle; dominant-baseline: central; }
+  </style>
+  <rect class="bg" width="100" height="100" rx="22"/>
+  <circle class="wheel" cx="50" cy="50" r="40"/>
+  <!-- Five tiles on the ring; W-O-R swiped. -->
+  <polyline class="trail" points="50,23 75.7,41.7 65.9,71.8" fill="none" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <line class="trail" x1="65.9" y1="71.8" x2="44" y2="56" stroke-width="4.5" stroke-linecap="round"/>
+  <circle class="on" cx="50" cy="23" r="11"/><text class="on-ink" x="50" y="23">W</text>
+  <circle class="on" cx="75.7" cy="41.7" r="11"/><text class="on-ink" x="75.7" y="41.7">O</text>
+  <circle class="on" cx="65.9" cy="71.8" r="11"/><text class="on-ink" x="65.9" y="71.8">R</text>
+  <circle class="tile" cx="34.1" cy="71.8" r="11"/><text class="ink" x="34.1" y="71.8">D</text>
+  <circle class="tile" cx="24.3" cy="41.7" r="11"/><text class="ink" x="24.3" y="41.7">S</text>
+</svg>

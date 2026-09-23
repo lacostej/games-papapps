@@ -1,0 +1,31 @@
+/* Uses the page's --surface/--ink/--accent/--shadow tokens when it defines them. */
+.game-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px 0;
+  min-height: 48px;
+}
+
+.game-nav a {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--surface, #fff);
+  color: var(--ink, #2b2622);
+  box-shadow: var(--shadow, 0 1px 3px rgb(0 0 0 / 0.12));
+  -webkit-tap-highlight-color: transparent;
+}
+
+.game-nav a[aria-current='page'] {
+  outline: 2px solid var(--accent, #e0673b);
+  outline-offset: 2px;
+}
+
+.game-nav a:focus-visible { outline: 2px solid var(--accent, #e0673b); outline-offset: 2px; }
+.game-nav img { width: 100%; height: 100%; display: block; }
+.game-nav-home svg { width: 22px; height: 22px; fill: currentColor; opacity: 0.75; }

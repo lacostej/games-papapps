@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Papapps</title>
+  <style>
+    :root {
+      --bg: #f6f1e9; --surface: #ffffff; --ink: #2b2622; --muted: #8a8078; --accent: #e0673b;
+      --shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+      color-scheme: light;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1c1917; --surface: #292524; --ink: #f3ede6; --muted: #a39a91; --accent: #f07a4f;
+        --shadow: 0 1px 3px rgb(0 0 0 / 0.5);
+        color-scheme: dark;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      background: var(--bg);
+      color: var(--ink);
+      font: 16px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+      padding: calc(24px + env(safe-area-inset-top)) 16px 24px;
+    }
+    h1 { margin: 0 auto 20px; max-width: 640px; font-size: 24px; }
+    ul {
+      list-style: none;
+      margin: 0 auto;
+      padding: 0;
+      max-width: 640px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+      gap: 16px;
+    }
+    a { display: block; color: inherit; text-decoration: none; text-align: center; }
+    a img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 22%;
+      box-shadow: var(--shadow);
+      transition: transform 0.15s;
+    }
+    a:hover img, a:focus-visible img { transform: scale(1.04); }
+    a:focus-visible { outline: none; }
+    a:focus-visible img { outline: 3px solid var(--accent); outline-offset: 3px; }
+    a span { display: block; margin-top: 8px; font-weight: 600; }
+  </style>
+  <link rel="icon" href="word-connect/icon.svg">
+</head>
+<body>
+  <h1>Papapps</h1>
+  <ul id="games"></ul>
+  <script type="module">
+    import { GAMES } from './games.js';
+    document.getElementById('games').replaceChildren(
+      ...GAMES.map((game) => {
+        const li = document.createElement('li');
+        const a = Object.assign(document.createElement('a'), { href: game.path });
+        a.append(
+          Object.assign(document.createElement('img'), { src: game.icon, alt: '' }),
+          Object.assign(document.createElement('span'), { textContent: game.name }),
+        );
+        li.append(a);
+        return li;
+      }),
+    );
+  </script>
+</body>
+</html>

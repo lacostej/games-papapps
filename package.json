@@ -1,0 +1,10 @@
+{
+  "name": "papapps",
+  "private": true,
+  "type": "module",
+  "workspaces": ["word-connect"],
+  "scripts": {
+    "start": "node serve.mjs",
+    "test": "npm test --workspaces"
+  }
+}

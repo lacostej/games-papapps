@@ -1,4 +1,4 @@
-// Static server reachable from phones on the same Wi-Fi. Usage: node serve.mjs [port]
+// Serves the whole site, reachable from phones on the same Wi-Fi. Usage: node serve.mjs [port]
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { networkInterfaces } from 'node:os';
@@ -36,7 +36,7 @@ server.on('error', (err) => {
 });
 
 server.listen(port, '0.0.0.0', () => {
-  console.log(`Word Connect on http://localhost:${port}/`);
+  console.log(`Papapps on http://localhost:${port}/`);
   for (const addrs of Object.values(networkInterfaces())) {
     for (const a of addrs ?? []) {
       if (a.family === 'IPv4' && !a.internal) console.log(`  on your phone: http://${a.address}:${port}/`);
