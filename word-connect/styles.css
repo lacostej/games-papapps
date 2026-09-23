@@ -10,6 +10,7 @@
   --good: #2f9e6a;
   --bad: #d14343;
   --dup: #d99a1e;
+  --bonus: #3b7fc4;
   --shadow: 0 1px 3px rgb(0 0 0 / 0.12);
   color-scheme: light;
 }
@@ -23,6 +24,7 @@
     --wheel: #2f2a26;
     --tile: #3a3430;
     --accent: #f07a4f;
+    --bonus: #6aa8e8;
     --shadow: 0 1px 3px rgb(0 0 0 / 0.5);
     color-scheme: dark;
   }
@@ -120,6 +122,7 @@ main {
   letter-spacing: 0.06em;
   font-size: 15px;
 }
+#found-list li.bonus { background: transparent; box-shadow: none; outline: 1.5px dashed var(--bonus); outline-offset: -1.5px; color: var(--bonus); }
 #found-list li.new { animation: pop 0.4s ease-out; }
 #found-list li.again { animation: flash-dup 0.6s ease-out; }
 
@@ -145,6 +148,7 @@ main {
 .preview.active { opacity: 1; }
 .preview.good { opacity: 1; background: var(--good); animation: pop 0.35s ease-out; }
 .preview.bad { opacity: 1; background: var(--bad); animation: shake 0.35s ease-in-out; }
+.preview.bonus { opacity: 1; background: var(--bonus); animation: pop 0.35s ease-out; }
 .preview.dup { opacity: 1; background: var(--dup); animation: shake 0.35s ease-in-out; }
 .preview.fade { opacity: 0; transition: opacity 0.3s 0.25s; }
 
@@ -212,6 +216,8 @@ dialog h2 { margin: 0 0 8px; font-size: 18px; }
 .tuning output { white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
 .all-words { font-size: 13px; line-height: 1.6; word-spacing: 0.3em; }
 .all-words .got { color: var(--good); font-weight: 700; }
+dialog details + details { margin-top: 6px; }
+.credits { font-size: 12px; color: var(--muted); margin: 12px 0 0; }
 dialog form { text-align: right; margin-top: 12px; }
 
 @keyframes pop { 0% { transform: scale(0.85); } 60% { transform: scale(1.08); } 100% { transform: scale(1); } }

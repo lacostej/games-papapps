@@ -1,9 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Language } from '../src/core/language.js';
-import { Dictionary } from '../src/core/dictionary.js';
 import { Selection } from '../src/core/selection.js';
-import { createPuzzle, seededRandom, shuffle } from '../src/core/puzzle.js';
+import { dealPuzzle, seededRandom, shuffle } from '../src/core/puzzle.js';
 import { FreePlay } from '../src/core/free-play.js';
 
 const en = new Language({ code: 'en' });
@@ -28,19 +27,6 @@ test('tiles split digraphs greedily', () => {
   assert.deepEqual(en.tiles('CAT'), ['C', 'A', 'T']);
 });
 
-test('dictionary ignores comments, non-letters and words longer than maxTiles', () => {
-  const d = Dictionary.fromText(en, '# header\nstar\n\nit\'s\nwaterfalls\nrats\n');
-  assert.equal(d.size, 2);
-  assert.ok(d.has('STAR'));
-  assert.ok(!d.has('WATERFALLS'));
-});
-
-test('wordsFrom uses each tile at most once and respects duplicates', () => {
-  const d = new Dictionary(en, ['tea', 'eat', 'tee', 'teeth', 'ate', 'at', 'seat']);
-  assert.deepEqual(d.wordsFrom(['T', 'E', 'A']), ['ATE', 'EAT', 'TEA']);
-  assert.deepEqual(d.wordsFrom(['T', 'E', 'A', 'E']), ['ATE', 'EAT', 'TEA', 'TEE']);
-});
-
 test('selection adds, refuses reuse, and backtracks onto the previous tile', () => {
   const s = new Selection();
   assert.equal(s.enter(0), 'add');
@@ -55,34 +41,39 @@ test('selection adds, refuses reuse, and backtracks onto the previous tile', () 
   assert.equal(s.enter(0), null);
 });
 
-test('free play scores each distinct word once', () => {
-  const d = new Dictionary(en, ['tea', 'eat', 'ate']);
-  const game = new FreePlay(d, { words: d.wordsFrom(['T', 'E', 'A']) });
+test('free play scores each distinct word once, required or bonus', () => {
+  const game = new FreePlay({ words: ['EAT', 'TEA'], bonus: ['ETA'], minWordLength: 3 });
   assert.equal(game.submit(['T', 'E', 'A']).result, 'found');
   assert.equal(game.submit(['T', 'E', 'A']).result, 'duplicate');
+  assert.equal(game.submit(['E', 'T', 'A']).result, 'bonus');
+  assert.equal(game.submit(['E', 'T', 'A']).result, 'duplicate');
   assert.equal(game.submit(['A', 'E', 'T']).result, 'invalid');
   assert.equal(game.submit(['T', 'E']).result, 'too-short');
   assert.equal(game.submit(['T']).result, 'ignored');
   assert.equal(game.submit([]).result, 'ignored');
-  assert.equal(game.score, 1);
-  assert.equal(game.total, 3);
+  assert.equal(game.score, 2);
+  assert.deepEqual(game.found, ['TEA']);
+  assert.deepEqual(game.bonusFound, ['ETA']);
+  assert.equal(game.total, 2);
 });
 
-test('createPuzzle picks a seed of the requested size and scrambles it', () => {
-  const d = new Dictionary(en, ['stone', 'notes', 'tone', 'note', 'one', 'toe', 'cat']);
+test('dealPuzzle scrambles the tiles and avoids the previous puzzle', () => {
+  const pack = {
+    minWordLength: 3,
+    puzzles: [
+      { tiles: ['E', 'N', 'O', 'S', 'T'], words: ['NOTE', 'STONE', 'TONES'], bonus: ['ONSET'] },
+      { tiles: ['A', 'C', 'T'], words: ['CAT'], bonus: [] },
+    ],
+  };
   for (let i = 0; i < 20; i++) {
-    const p = createPuzzle({ dictionary: d, seeds: ['STONE', 'CAT'], size: 5, rng: seededRandom(i) });
-    assert.equal(p.seed, 'STONE');
-    assert.notEqual(p.tiles.join(''), 'STONE');
-    assert.deepEqual([...p.tiles].sort(), [...'STONE'].sort());
-    assert.deepEqual(p.words, ['ONE', 'TOE', 'NOTE', 'TONE', 'NOTES', 'STONE']);
+    const p = dealPuzzle(pack, { rng: seededRandom(i), avoid: 1 });
+    assert.equal(p.index, 0);
+    assert.ok(!p.words.includes(p.tiles.join('')), p.tiles.join(''));
+    assert.deepEqual([...p.tiles].sort(), ['E', 'N', 'O', 'S', 'T']);
+    assert.deepEqual(p.bonus, ['ONSET']);
+    assert.equal(p.minWordLength, 3);
   }
-});
-
-test('createPuzzle falls back to dictionary words when no seed fits', () => {
-  const d = new Dictionary(en, ['cats', 'cat']);
-  assert.equal(createPuzzle({ dictionary: d, seeds: [], size: 4 }).seed, 'CATS');
-  assert.throws(() => createPuzzle({ dictionary: d, seeds: [], size: 6 }));
+  assert.equal(dealPuzzle({ ...pack, puzzles: [pack.puzzles[1]] }, { avoid: 0 }).index, 0);
 });
 
 test('shuffle keeps every item', () => {

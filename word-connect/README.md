@@ -1,26 +1,28 @@
 # Word Connect
 
-Prototype of the letter-wheel manipulative: swipe across 4–7 letters to form a word, one point per new dictionary word.
+Prototype of the letter-wheel manipulative: swipe across 4–7 letters to form a word, one point per new valid word. Each puzzle has required words (common ones) and bonus words (rare but valid).
 
 ```
-npm start      # serves on :8080 and prints the LAN URL to open on a phone
+npm start                      # serves on :8080 and prints the LAN URL to open on a phone
 npm test
-npm run build:dict [en|fr]
+npm run build:puzzles [en|fr]  # rebuilds puzzles/<code>/<size>.json
 ```
 
-No dependencies, no build step: plain ES modules.
+No dependencies, no build step for the app: plain ES modules.
 
 ## Layout
 
-- `src/core/`: platform-free logic. `Language` (normalization, tiles), `Dictionary`, `Selection` (swipe path with backtrack), `createPuzzle`, `FreePlay` (scoring mode).
+- `src/core/`: platform-free logic. `Language` (normalization, tiles), `WordIndex` (words a set of tiles can spell, used by the build), `Selection` (swipe path with backtrack), `dealPuzzle`, `FreePlay` (scoring, required and bonus words).
 - `src/ui/wheel.js`: the swipe component. It emits the swiped tiles on release and knows nothing about scoring, so other modes (word grid, "find N words") can reuse it.
-- `src/data/languages.js`: language registry. `dictionaries/<code>/words.txt` holds the valid words, `seeds.txt` the words used to pick letter sets.
+- `src/data/languages.js`: language registry.
+- `puzzles/<code>/<size>.json`: what players download, 100 puzzles each with their required and bonus words (2–14 KB gzip). The full word source is only needed to build them.
 - `src/ui/i18n.js`: interface strings (en, fr). The interface language follows the browser and is separate from the word language.
 - The ⋯ button opens a settings and test panel: interface language, a hit-size slider, swipe stats, and the puzzle's full word list.
 
-## Dictionaries
+## Word sources
 
-- **en**: built from macOS `/usr/share/dict/words` (web2, public domain). That list has no plurals, so the build adds `+S` forms, which accepts some non-words. It also contains many obscure words.
-- **fr**: a small hand-made sample (~300 words) to exercise accents and ligatures.
+Configured in `tools/puzzle-sources.json`. Sources are build inputs, never shipped.
 
-For real play, put a proper list in `tools/dictionary-sources.json` and rebuild. The build fails if a seed is missing from the dictionary.
+- **fr**: Lexique Dicollecte 6.4.1 (Grammalecte, MPL 2.0), from [openlexicon](https://github.com/chrplr/openlexicon). Download it into `sources/fr/` (gitignored); the build prints the URL if it is missing. Required words: frequency index ≥ 6, ≥ 100 occurrences in its literature corpus, no register/regional note, no passé simple or imperfect subjunctive. Everything else in the standard spellings is a bonus word.
+- **en**: macOS `/usr/share/dict/words` (web2, public domain). Letter sets come from `tools/seeds/en.txt`; generated `-S` plurals are bonus words only. To be replaced by a list with inflections and frequencies.
+- `tools/curation/`: words demoted to bonus or rejected by hand. The build fails if a listed word isn't in the source, so typos can't go unnoticed.

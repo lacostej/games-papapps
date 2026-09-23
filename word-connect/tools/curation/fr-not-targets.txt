@@ -1,0 +1,22 @@
+# Accepted as bonus words, never required: abbreviations, Latin, foreign, word fragments, rude words.
+bey
+dey
+dei
+sic
+nec
+ter
+leu
+lei
+sen
+lai
+out
+man
+van
+fat
+heu
+rez
+dom
+eue
+eus
+cul
+con

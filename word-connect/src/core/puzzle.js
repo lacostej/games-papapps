@@ -1,20 +1,13 @@
-// A puzzle is a set of tiles plus every dictionary word they can spell.
-export function createPuzzle({ dictionary, seeds, size, rng = Math.random }) {
-  const { language } = dictionary;
-  const ofSize = (words) => words.filter((w) => language.tiles(w).length === size);
-  let candidates = ofSize(seeds.filter((w) => dictionary.has(w)));
-  if (candidates.length === 0) candidates = ofSize([...dictionary.words()]);
-  if (candidates.length === 0) {
-    throw new Error(`No ${size}-letter word available in ${language.code}`);
-  }
-
-  const seed = candidates[Math.floor(rng() * candidates.length)];
-  const seedTiles = language.tiles(seed);
-  let tiles = shuffle(seedTiles, rng);
-  // Don't hand the answer over in reading order.
-  for (let i = 0; i < 5 && tiles.join('') === seed; i++) tiles = shuffle(seedTiles, rng);
-
-  return { seed, tiles, words: dictionary.wordsFrom(tiles) };
+// Picks a puzzle from a pack (see tools/build-puzzles.mjs) and scrambles its tiles.
+export function dealPuzzle(pack, { rng = Math.random, avoid } = {}) {
+  const indices = pack.puzzles.map((_, i) => i);
+  const choices = indices.length > 1 ? indices.filter((i) => i !== avoid) : indices;
+  const index = choices[Math.floor(rng() * choices.length)];
+  const { tiles, words, bonus } = pack.puzzles[index];
+  let order = shuffle(tiles, rng);
+  // Don't hand over a full-length word in reading order.
+  for (let i = 0; i < 5 && words.includes(order.join('')); i++) order = shuffle(tiles, rng);
+  return { index, tiles: order, words, bonus, minWordLength: pack.minWordLength };
 }
 
 export function shuffle(items, rng = Math.random) {
@@ -26,7 +19,7 @@ export function shuffle(items, rng = Math.random) {
   return out;
 }
 
-// Small deterministic generator for tests and reproducible puzzles.
+// Small deterministic generator for tests and reproducible builds.
 export function seededRandom(seed) {
   let s = seed >>> 0;
   return () => {

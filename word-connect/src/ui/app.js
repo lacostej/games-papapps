@@ -1,9 +1,9 @@
 import { LetterWheel } from './wheel.js';
 import { pickUiLanguage, translateDom, translator, UI_LANGUAGES } from './i18n.js';
-import { createPuzzle } from '../core/puzzle.js';
+import { dealPuzzle } from '../core/puzzle.js';
 import { FreePlay } from '../core/free-play.js';
 import { LANGUAGES } from '../data/languages.js';
-import { loadLanguagePack } from '../data/loader.js';
+import { loadPuzzlePack } from '../data/loader.js';
 
 const SIZES = [4, 5, 6, 7];
 const $ = (id) => document.getElementById(id);
@@ -17,7 +17,9 @@ const ui = {
   preview: $('preview'),
   panel: $('panel'),
   stats: $('stats'),
-  allWords: $('all-words'),
+  targetWords: $('target-words'),
+  bonusWords: $('bonus-words'),
+  credits: $('credits'),
   hitScale: $('hit-scale'),
   hitScaleValue: $('hit-scale-value'),
 };
@@ -76,13 +78,15 @@ function applyUiLanguage() {
 
 async function start() {
   const code = ui.language.value;
-  if (!packs.has(code)) packs.set(code, await loadLanguagePack(code));
-  pack = packs.get(code);
-  const puzzle = createPuzzle({ ...pack, size: Number(ui.size.value) });
-  game = new FreePlay(pack.dictionary, puzzle);
-  stats = { swipes: 0, found: 0, invalid: 0, duplicate: 0, tooShort: 0, taps: 0, backtracks: 0, shuffles: 0, started: Date.now() };
+  const key = `${code}/${ui.size.value}`;
+  if (!packs.has(key)) packs.set(key, await loadPuzzlePack(code, Number(ui.size.value)));
+  const previous = pack === packs.get(key) ? game?.puzzle.index : undefined;
+  pack = packs.get(key);
+  const puzzle = dealPuzzle(pack, { avoid: previous });
+  game = new FreePlay(puzzle);
+  stats = { swipes: 0, found: 0, bonus: 0, invalid: 0, duplicate: 0, tooShort: 0, taps: 0, backtracks: 0, shuffles: 0, started: Date.now() };
   // Letters and words are in the word language, which may differ from the interface.
-  for (const el of [$('wheel'), ui.foundList, ui.preview, ui.allWords]) el.lang = code;
+  for (const el of [$('wheel'), ui.foundList, ui.preview, ui.targetWords, ui.bonusWords]) el.lang = code;
   wheel.setTiles(puzzle.tiles);
   ui.foundList.replaceChildren();
   ui.preview.className = 'preview';
@@ -92,23 +96,23 @@ async function start() {
 function submit(tiles) {
   const { result, word } = game.submit(tiles);
   stats.swipes += 1;
-  const counter = { found: 'found', invalid: 'invalid', duplicate: 'duplicate', 'too-short': 'tooShort', ignored: 'taps' }[result];
+  const counter = { found: 'found', bonus: 'bonus', invalid: 'invalid', duplicate: 'duplicate', 'too-short': 'tooShort', ignored: 'taps' }[result];
   stats[counter] += 1;
 
   if (result === 'ignored') {
     ui.preview.className = 'preview';
     return;
   }
-  const style = { found: 'good', duplicate: 'dup' }[result] ?? 'bad';
+  const style = { found: 'good', bonus: 'bonus', duplicate: 'dup' }[result] ?? 'bad';
   ui.preview.textContent = word;
   ui.preview.className = `preview ${style}`;
   void ui.preview.offsetWidth; // let the colour show before fading out
   ui.preview.classList.add('fade');
 
-  if (result === 'found') {
+  if (result === 'found' || result === 'bonus') {
     const li = document.createElement('li');
     li.textContent = word;
-    li.className = 'new';
+    li.className = result === 'bonus' ? 'new bonus' : 'new';
     ui.foundList.prepend(li);
     renderScore(true);
     navigator.vibrate?.([15, 40, 15]);
@@ -147,6 +151,7 @@ function renderPanel() {
   const rows = [
     ['statSwipes', t.number(stats.swipes)],
     ['statFound', t.number(stats.found)],
+    ['statBonus', t.number(stats.bonus)],
     ['statInvalid', t.number(stats.invalid)],
     ['statDuplicate', t.number(stats.duplicate)],
     ['statTooShort', t.number(stats.tooShort)],
@@ -154,8 +159,7 @@ function renderPanel() {
     ['statBacktracks', t.number(stats.backtracks)],
     ['statShuffles', t.number(stats.shuffles)],
     ['statMinutes', minutes],
-    ['statDictionary', t.number(pack.dictionary.size)],
-    ['statSeed', game.puzzle.seed],
+    ['statPuzzle', `${t.number(game.puzzle.index + 1)} / ${t.number(pack.puzzles.length)}`],
   ];
   ui.stats.replaceChildren(
     ...rows.flatMap(([key, value]) => [
@@ -163,13 +167,17 @@ function renderPanel() {
       Object.assign(document.createElement('dd'), { textContent: value }),
     ]),
   );
-  ui.allWords.replaceChildren(
-    ...game.puzzle.words.flatMap((w) => {
-      const span = Object.assign(document.createElement('span'), { textContent: w });
-      if (game.found.includes(w)) span.className = 'got';
-      return [span, ' '];
-    }),
-  );
+  const listWords = (el, words, found) =>
+    el.replaceChildren(
+      ...words.flatMap((w) => {
+        const span = Object.assign(document.createElement('span'), { textContent: w });
+        if (found.includes(w)) span.className = 'got';
+        return [span, ' '];
+      }),
+    );
+  listWords(ui.targetWords, game.puzzle.words, game.found);
+  listWords(ui.bonusWords, game.puzzle.bonus, game.bonusFound);
+  ui.credits.textContent = t('credits', { source: pack.attribution });
 }
 
 function loadPrefs() {
