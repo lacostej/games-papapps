@@ -1,0 +1,20 @@
+# Accepted as bonus words, never required: abbreviation plurals, dialect, jargon, rude words.
+cis
+hes
+pis
+mos
+ems
+nth
+tho
+tel
+pol
+hie
+sim
+sic
+nom
+luv
+mas
+sos
+erg
+ass
+tit

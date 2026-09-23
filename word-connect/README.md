@@ -24,5 +24,5 @@ No dependencies, no build step for the app: plain ES modules.
 Configured in `tools/puzzle-sources.json`. Sources are build inputs, never shipped.
 
 - **fr**: Lexique Dicollecte 6.4.1 (Grammalecte, MPL 2.0), from [openlexicon](https://github.com/chrplr/openlexicon). Download it into `sources/fr/` (gitignored); the build prints the URL if it is missing. Required words: frequency index ≥ 6, ≥ 100 occurrences in its literature corpus, no register/regional note, no passé simple or imperfect subjunctive. Everything else in the standard spellings is a bonus word.
-- **en**: macOS `/usr/share/dict/words` (web2, public domain). Letter sets come from `tools/seeds/en.txt`; generated `-S` plurals are bonus words only. To be replaced by a list with inflections and frequencies.
+- **en**: [ENABLE](https://github.com/dolph/dictionary) (public domain) decides what is valid; [SCOWL/ESDB](https://github.com/en-wl/wordlist) size levels (MIT-like, Kevin Atkinson) decide what is required: ENABLE words at SCOWL size ≤ 50 ("medium"). Common words newer than ENABLE (SCOWL ≤ 60, e.g. "email") are bonus words. Put `enable1.txt` and `scowl-pre.txt` in `sources/en/`.
 - `tools/curation/`: words demoted to bonus or rejected by hand. The build fails if a listed word isn't in the source, so typos can't go unnoticed.

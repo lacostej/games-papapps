@@ -34,31 +34,39 @@
     "rejected": "tools/curation/fr-rejected.txt"
   },
   "en": {
-    "reader": "wordlist",
-    "path": "/usr/share/dict/words",
-    "attribution": "Webster's Second International (1934), public domain.",
+    "reader": "enableScowl",
+    "path": "sources/en/enable1.txt",
+    "download": "https://raw.githubusercontent.com/dolph/dictionary/master/enable1.txt",
+    "attribution": "ENABLE (public domain) and SCOWL/ESDB, Copyright 2000-2026 Kevin Atkinson (MIT-like licence).",
     "options": {
-      "skipCapitalized": true,
-      "addSPlurals": true
+      "scowl": "sources/en/scowl-pre.txt",
+      "scowlDownload": "https://raw.githubusercontent.com/en-wl/wordlist/v2/data/scowl-pre.txt",
+      "maxTargetSize": 50,
+      "maxExtraSize": 60
     },
-    "seeds": "tools/seeds/en.txt",
     "sizes": {
       "4": {
         "count": 100,
-        "minWords": 3
+        "minWords": 3,
+        "maxWords": 15
       },
       "5": {
         "count": 100,
-        "minWords": 4
+        "minWords": 4,
+        "maxWords": 25
       },
       "6": {
         "count": 100,
-        "minWords": 6
+        "minWords": 6,
+        "maxWords": 35
       },
       "7": {
         "count": 100,
-        "minWords": 8
+        "minWords": 8,
+        "maxWords": 45
       }
-    }
+    },
+    "notTargets": "tools/curation/en-not-targets.txt",
+    "rejected": "tools/curation/en-rejected.txt"
   }
 }

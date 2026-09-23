@@ -9,9 +9,9 @@ import { parseWordList } from '../src/core/word-list.js';
 import { seededRandom, shuffle } from '../src/core/puzzle.js';
 import { LANGUAGES } from '../src/data/languages.js';
 import { readDicollecte } from './sources/dicollecte.mjs';
-import { readWordList } from './sources/wordlist.mjs';
+import { readEnableScowl } from './sources/enable-scowl.mjs';
 
-const READERS = { dicollecte: readDicollecte, wordlist: readWordList };
+const READERS = { dicollecte: readDicollecte, enableScowl: readEnableScowl };
 const root = fileURLToPath(new URL('..', import.meta.url));
 const sources = JSON.parse(readFileSync(`${root}/tools/puzzle-sources.json`, 'utf8'));
 const codes = process.argv.slice(2).length ? process.argv.slice(2) : Object.keys(sources);
@@ -21,13 +21,15 @@ for (const code of codes) {
   const definition = LANGUAGES.find((l) => l.code === code);
   if (!config || !definition) throw new Error(`No source or language definition for ${code}`);
   const language = new Language(definition);
-  const path = config.path.startsWith('/') ? config.path : `${root}/${config.path}`;
-  if (!existsSync(path)) {
-    throw new Error(`${path} missing${config.download ? `; download it from ${config.download}` : ''}`);
-  }
+  const resolve = (p) => {
+    const full = p.startsWith('/') ? p : `${root}/${p}`;
+    if (!existsSync(full)) throw new Error(`${full} missing; see the download URLs in tools/puzzle-sources.json`);
+    return full;
+  };
+  const path = resolve(config.path);
 
   const index = new WordIndex(language);
-  for (const { word, target } of READERS[config.reader](path, config.options ?? {})) {
+  for (const { word, target } of READERS[config.reader](path, config.options ?? {}, resolve)) {
     index.add(language.normalize(word), { target });
   }
 
@@ -40,14 +42,8 @@ for (const code of codes) {
   curated('rejected', (w) => index.delete(w));
   curated('notTargets', (w) => index.demote(w));
 
-  const seeds = config.seeds
-    ? parseWordList(readFileSync(`${root}/${config.seeds}`, 'utf8')).map((w) => language.normalize(w))
-    : null;
-  for (const seed of seeds ?? []) {
-    if (!index.get(seed)?.target) throw new Error(`${code}: seed ${seed} is not a target word`);
-  }
-  // Every puzzle contains at least one word using all its letters.
-  const candidates = seeds ?? [...index.entries()].filter(([, e]) => e.target).map(([w]) => w);
+  // Every puzzle contains at least one required word using all its letters.
+  const candidates = [...index.entries()].filter(([, e]) => e.target).map(([w]) => w);
 
   mkdirSync(`${root}/puzzles/${code}`, { recursive: true });
   console.log(`${code}:`);
