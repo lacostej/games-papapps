@@ -1,0 +1,14 @@
+{
+  "en": {
+    "source": "/usr/share/dict/words",
+    "note": "macOS web2 (Webster's 2nd, public domain). Has no plurals, hence addSPlurals.",
+    "skipCapitalized": true,
+    "addSPlurals": true
+  },
+  "fr": {
+    "source": "dictionaries/fr/source.txt",
+    "note": "Small hand-made sample list, enough to exercise accents and ligatures.",
+    "skipCapitalized": true,
+    "addSPlurals": true
+  }
+}

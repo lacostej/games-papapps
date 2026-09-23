@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Word Connect</title>
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="src/ui/app.js"></script>
+</head>
+<body>
+  <header class="toolbar">
+    <select id="language" data-i18n-label="wordLanguage"></select>
+    <select id="size" data-i18n-label="letterCount"></select>
+    <div class="score" aria-live="polite"><span id="score">0</span><span class="unit" data-i18n="points"></span></div>
+    <button id="open-panel" class="icon" data-i18n-label="openPanel">⋯</button>
+  </header>
+
+  <main>
+    <section class="found">
+      <p id="progress" class="progress"></p>
+      <ul id="found-list"></ul>
+    </section>
+
+    <div class="preview-row"><div id="preview" class="preview" aria-live="polite"></div></div>
+
+    <div class="wheel-wrap">
+      <svg id="wheel" viewBox="0 0 100 100" data-i18n-label="wheel"></svg>
+    </div>
+
+    <div class="actions">
+      <button id="shuffle" data-i18n="shuffle"></button>
+      <button id="new" data-i18n="newLetters"></button>
+    </div>
+  </main>
+
+  <dialog id="panel">
+    <h2 data-i18n="panelTitle"></h2>
+    <label class="tuning"><span data-i18n="interfaceLanguage"></span> <select id="ui-language"></select></label>
+    <label class="tuning stacked"><span data-i18n="hitSize"></span> <input id="hit-scale" type="range" min="0.5" max="1.3" step="0.05" value="1"> <output id="hit-scale-value"></output></label>
+    <dl id="stats"></dl>
+    <details>
+      <summary data-i18n="allWords"></summary>
+      <p id="all-words" class="all-words"></p>
+    </details>
+    <form method="dialog"><button data-i18n="close"></button></form>
+  </dialog>
+</body>
+</html>
