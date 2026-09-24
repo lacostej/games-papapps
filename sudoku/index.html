@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Sudoku</title>
+  <link rel="icon" href="icon.svg">
+  <link rel="stylesheet" href="../shared/game-nav.css">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="../shared/game-nav.js"></script>
+  <script type="module" src="src/ui/app.js"></script>
+</head>
+<body>
+  <nav data-game-nav="sudoku"></nav>
+  <header class="toolbar">
+    <select id="size" data-i18n-label="gridSize"></select>
+    <select id="symbols" data-i18n-label="symbols"></select>
+    <select id="level" data-i18n-label="difficulty"></select>
+  </header>
+
+  <main>
+    <p id="status" class="status" aria-live="polite"></p>
+    <div id="board" class="board" role="group" data-i18n-label="board"></div>
+    <div id="pad" class="pad" role="group" data-i18n-label="pad"></div>
+    <div class="actions">
+      <button id="restart" data-i18n="restart"></button>
+      <button id="new" data-i18n="newGrid"></button>
+    </div>
+  </main>
+</body>
+</html>

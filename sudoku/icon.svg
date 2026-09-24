@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <style>
+    .bg { fill: #f6f1e9; } .board { fill: #6f655c; } .cell { fill: #fffdf9; } .ink { fill: #2b2622; }
+    .entered { fill: #3b6fb0; } .on { fill: #e0673b; } .on-ink { fill: #fff; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #1c1917; } .board { fill: #8a8078; } .cell { fill: #3a3430; } .ink { fill: #f3ede6; }
+      .entered { fill: #7fb0ea; } .on { fill: #f07a4f; }
+    }
+    text { font: 700 15px system-ui, -apple-system, sans-serif; text-anchor: middle; dominant-baseline: central; }
+  </style>
+  <rect class="bg" width="100" height="100" rx="22"/>
+  <!-- A solved-looking 4x4 in 2x2 boxes, one cell selected. -->
+  <rect class="board" x="14" y="14" width="72" height="72" rx="6"/>
+  <g class="cell">
+    <rect x="16" y="16" width="16.5" height="16.5"/><rect x="33.5" y="16" width="16.5" height="16.5"/>
+    <rect x="52" y="16" width="16.5" height="16.5"/><rect x="69.5" y="16" width="14.5" height="16.5"/>
+    <rect x="16" y="33.5" width="16.5" height="16.5"/><rect x="33.5" y="33.5" width="16.5" height="16.5"/>
+    <rect x="52" y="33.5" width="16.5" height="16.5"/><rect x="69.5" y="33.5" width="14.5" height="16.5"/>
+    <rect x="16" y="52" width="16.5" height="16.5"/><rect x="33.5" y="52" width="16.5" height="16.5"/>
+    <rect x="69.5" y="52" width="14.5" height="16.5"/>
+    <rect x="16" y="69.5" width="16.5" height="14.5"/><rect x="33.5" y="69.5" width="16.5" height="14.5"/>
+    <rect x="52" y="69.5" width="16.5" height="14.5"/><rect x="69.5" y="69.5" width="14.5" height="14.5"/>
+  </g>
+  <rect class="on" x="52" y="52" width="16.5" height="16.5"/>
+  <text class="ink" x="24.25" y="24.25">1</text><text class="ink" x="76.75" y="24.25">4</text>
+  <text class="entered" x="41.75" y="41.75">4</text><text class="ink" x="60.25" y="41.75">1</text>
+  <text class="ink" x="24.25" y="60.25">2</text><text class="on-ink" x="60.25" y="60.25">4</text>
+  <text class="ink" x="41.75" y="76.75">3</text><text class="entered" x="76.75" y="76.75">1</text>
+</svg>

@@ -3,6 +3,7 @@
 Small browser games, one folder each, published at https://lacostej.github.io/games-papapps/.
 
 - [word-connect](word-connect/): swipe letters on a wheel to form words.
+- [sudoku](sudoku/): 4×4, 6×6 and 9×9 grids in digits, letters or fruit, four difficulty levels.
 
 ```
 npm start   # serves the whole site on :8080, with the LAN URL for phones
