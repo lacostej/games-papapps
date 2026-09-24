@@ -1,6 +1,7 @@
 // "Install" button for the game menu and home page, plus the service worker that lets the
 // installed app work offline. Chromium browsers install through their own prompt; Safari
-// and Firefox on Android have no prompt a page can open, so the button shows the steps.
+// and Firefox on Android have no prompt a page can open, so the button shows the steps
+// (Firefox labels as seen in Firefox 156 for Android, en and fr).
 const root = new URL('../', import.meta.url);
 const lang = (navigator.languages?.[0] ?? 'en').split('-')[0];
 const TEXTS = {
@@ -8,14 +9,14 @@ const TEXTS = {
     install: 'Install as an app',
     title: 'Install Papapps',
     ios: 'Tap the Share button, then “Add to Home Screen”.',
-    firefox: 'Open the ⋮ menu and add this site to your home screen.',
+    firefox: 'Open the ⋮ menu, then More, then “Add to Home screen”.',
     ok: 'OK',
   },
   fr: {
     install: 'Installer comme une app',
     title: 'Installer Papapps',
     ios: 'Touchez le bouton Partager, puis « Sur l’écran d’accueil ».',
-    firefox: 'Ouvrez le menu ⋮ et ajoutez ce site à l’écran d’accueil.',
+    firefox: 'Ouvrez le menu ⋮, puis Plus, puis « Ajouter à l’écran d’accueil ».',
     ok: 'OK',
   },
 };
