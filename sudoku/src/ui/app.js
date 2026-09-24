@@ -20,6 +20,8 @@ const saved = loadSaved();
 let board;
 let cells = [];
 let selected = -1;
+// Value highlighted while a pad key is held with no cell selected.
+let peek = 0;
 
 document.documentElement.lang = t.code;
 translateDom(document, t);
@@ -88,7 +90,7 @@ function buildBoard() {
   const boxes = board.geometry.boxes.map(() => Object.assign(document.createElement('div'), { className: 'box' }));
   cells = board.values.map((_, i) => {
     const cell = Object.assign(document.createElement('button'), { className: 'cell', tabIndex: -1 });
-    cell.addEventListener('click', () => select(i));
+    cell.addEventListener('click', () => select(i === selected ? -1 : i));
     boxes[board.geometry.boxOf[i]].append(cell);
     return cell;
   });
@@ -104,6 +106,10 @@ function buildPad() {
     ...symbols().slice(0, board.n).map((symbol, k) => {
       const key = Object.assign(document.createElement('button'), { textContent: symbol });
       key.addEventListener('click', () => enter(k + 1));
+      key.addEventListener('pointerdown', () => selected < 0 && setPeek(k + 1));
+      for (const type of ['pointerup', 'pointercancel', 'pointerleave']) key.addEventListener(type, () => setPeek(0));
+      // A long press would otherwise open the context menu and cancel the pointer.
+      key.addEventListener('contextmenu', (e) => e.preventDefault());
       return key;
     }),
     erase,
@@ -114,6 +120,14 @@ function select(i, focus = false) {
   selected = i;
   render();
   if (focus) cells[i].focus();
+  // Otherwise the focus ring looks like a selection.
+  else if (i < 0 && cells.includes(document.activeElement)) document.activeElement.blur();
+}
+
+function setPeek(v) {
+  if (peek === v) return;
+  peek = v;
+  render();
 }
 
 // Tapping the value a cell already holds clears it.
@@ -138,6 +152,7 @@ function onKey(e) {
     const c = (g.colOf[selected] + dc + n) % n;
     return select(r * n + c, true);
   }
+  if (e.key === 'Escape') return select(-1);
   if (['Backspace', 'Delete', '0', ' '].includes(e.key)) {
     e.preventDefault();
     return enter(0);
@@ -153,7 +168,7 @@ function render() {
   const { n, values, geometry: g } = board;
   const shown = symbols();
   const conflicts = board.conflicts();
-  const value = selected >= 0 ? values[selected] : 0;
+  const value = selected >= 0 ? values[selected] : peek;
   const near = (i) =>
     selected >= 0 && (g.rowOf[i] === g.rowOf[selected] || g.colOf[i] === g.colOf[selected] || g.boxOf[i] === g.boxOf[selected]);
   cells.forEach((cell, i) => {
