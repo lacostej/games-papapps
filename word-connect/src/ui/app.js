@@ -236,7 +236,10 @@ function setAttrs(el, attrs) {
 
 function renderScore(bump = false) {
   ui.score.textContent = t.number(game.score);
-  ui.progress.textContent = t('progress', { found: t.number(game.found.length), total: t.number(game.total), count: game.total });
+  const progress = t('progress', { found: t.number(game.found.length), total: t.number(game.total), count: game.total });
+  // In grid mode the strip under the grid only shows a few bonus words, so count them here.
+  const bonus = game.bonusFound.length;
+  ui.progress.textContent = crossword && bonus ? t('withBonus', { progress, count: t.number(bonus) }) : progress;
   if (bump) {
     const box = ui.score.parentElement;
     box.classList.remove('bump');

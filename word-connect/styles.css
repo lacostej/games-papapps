@@ -75,6 +75,12 @@ button, select {
   .toolbar { gap: 6px; padding: 12px; }
   .toolbar select { padding: 0.4em 0.5em; }
 }
+@media (max-width: 340px) {
+  .toolbar { gap: 4px; padding: 12px 8px; }
+  .toolbar select { font-size: 13px; padding: 0.4em 0.3em; }
+  .score { font-size: 18px; }
+  .score .unit { display: none; }
+}
 
 .score {
   margin-left: auto;
@@ -131,13 +137,19 @@ main {
 #found-list li.again { animation: flash-dup 0.6s ease-out; }
 
 .preview-row {
-  height: 56px;
+  height: 8px;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
+  position: relative;
+  z-index: 1;
 }
 
 .preview {
+  /* Floats over the words above while swiping, instead of reserving its own row. */
+  flex: none;
+  pointer-events: none;
+  box-shadow: var(--shadow);
   min-width: 2em;
   padding: 6px 16px;
   border-radius: 12px;
@@ -249,7 +261,22 @@ dialog form { text-align: right; margin-top: 12px; }
 #grid.complete .cell text { fill: var(--accent-ink); }
 #grid .cell.new { animation: pop 0.4s ease-out; transform-box: fill-box; transform-origin: center; }
 #grid .cell.again rect { animation: flash-dup-cell 0.6s ease-out; }
-.with-grid #found-list { flex: none; max-height: 4.5em; overflow-y: auto; margin-top: 8px; }
+/* Bonus words stay on one line that scrolls sideways, newest first. Its height is reserved
+   from the start, so the grid is sized once and never shrinks as words are found. */
+.with-grid #found-list {
+  flex: none;
+  height: 34px;
+  margin-top: 8px;
+  padding: 2px 4px;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+.with-grid #found-list::-webkit-scrollbar { display: none; }
+.with-grid #found-list li { flex: none; }
 @keyframes flash-dup-cell { 30% { fill: var(--dup); } }
 .found.with-grid ~ .wheel-wrap { width: min(100%, 38dvh, 420px); }
 .toggle { display: grid; place-items: center; padding: 0.35em 0.55em; }

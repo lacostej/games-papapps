@@ -11,6 +11,8 @@ npm start   # serves the whole site on :8080, with the LAN URL for phones
 npm test    # every game's tests (what CI runs before deploying)
 ```
 
+Design goal: every game stays clean and usable on a phone (320–414 px wide), including at the end of a long game. What grows while playing (found words, bonus words, notes) scrolls, collapses or is counted; it never shrinks or pushes out the playing surface (wheel, grid, board, keyboard). Check new UI with a late-game state, not just a fresh one.
+
 Adding a game: a folder with its own `index.html`, `icon.svg` (square) and `package.json`, an entry in `games.js`, and the folder in the root `workspaces`. Add `<nav data-game-nav="<id>">` plus `shared/game-nav.{js,css}` to show the game menu.
 
 Pushing to `main` runs the tests and deploys to GitHub Pages (`.github/workflows/pages.yml`).
