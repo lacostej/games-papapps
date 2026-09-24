@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Hangman</title>
+  <link rel="icon" href="icon.svg">
+  <link rel="stylesheet" href="../shared/game-nav.css">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="../shared/game-nav.js"></script>
+  <script type="module" src="src/ui/app.js"></script>
+</head>
+<body>
+  <nav data-game-nav="hangman"></nav>
+  <header class="toolbar">
+    <select id="language" data-i18n-label="wordLanguage"></select>
+    <select id="level" data-i18n-label="difficulty"></select>
+    <div class="score" aria-live="polite"><span id="wins">0</span><span id="wins-unit" class="unit"></span></div>
+  </header>
+
+  <main>
+    <p id="hint" class="hint"></p>
+    <svg id="drawing" class="drawing" viewBox="0 0 100 100" role="img">
+      <path class="part" d="M8 94 H62" />
+      <path class="part" d="M20 94 V8" />
+      <path class="part" d="M20 8 H66 M20 22 L34 8" />
+      <path class="part" d="M66 8 V20" />
+      <circle class="part" cx="66" cy="28" r="8" />
+      <path class="part" d="M66 36 V62" />
+      <path class="part" d="M66 43 L55 54" />
+      <path class="part" d="M66 43 L77 54" />
+      <path class="part" d="M66 62 L57 78" />
+      <path class="part" d="M66 62 L75 78" />
+    </svg>
+    <p id="word" class="word"></p>
+    <p id="status" class="status" aria-live="polite"></p>
+    <div id="keyboard" class="keyboard" role="group" data-i18n-label="keyboard"></div>
+    <div class="actions"><button id="new" data-i18n="newWord"></button></div>
+  </main>
+</body>
+</html>

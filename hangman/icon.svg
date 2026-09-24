@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <style>
+    .bg { fill: #f6f1e9; } .ink { stroke: #2b2622; } .slot { stroke: #2b2622; } .letter { fill: #e0673b; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #1c1917; } .ink, .slot { stroke: #f3ede6; } .letter { fill: #f07a4f; }
+    }
+    text { font: 800 16px system-ui, -apple-system, sans-serif; text-anchor: middle; }
+  </style>
+  <rect class="bg" width="100" height="100" rx="22"/>
+  <g class="ink" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M18 66 H48 M28 66 V16 H62 V24 M28 28 L40 16"/>
+    <circle cx="62" cy="31" r="7"/>
+    <path d="M62 38 V52 M62 42 L55 49 M62 42 L69 49"/>
+  </g>
+  <!-- A word half found. -->
+  <g class="slot" stroke-width="3" stroke-linecap="round">
+    <path d="M16 88 H28 M34 88 H46 M52 88 H64 M70 88 H82"/>
+  </g>
+  <text class="letter" x="22" y="84">A</text><text class="letter" x="58" y="84">E</text>
+</svg>
