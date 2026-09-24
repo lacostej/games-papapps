@@ -3,7 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Papapps">
+  <meta name="theme-color" content="#f6f1e9" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1c1917" media="(prefers-color-scheme: dark)">
   <title>Papapps</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="shared/game-nav.css">
   <style>
     :root {
       --bg: #f6f1e9; --surface: #ffffff; --ink: #2b2622; --muted: #8a8078; --accent: #e0673b;
@@ -26,7 +34,8 @@
       font: 16px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
       padding: calc(24px + env(safe-area-inset-top)) 16px 24px;
     }
-    h1 { margin: 0 auto 20px; max-width: 640px; font-size: 24px; }
+    header { display: flex; align-items: center; gap: 12px; margin: 0 auto 20px; max-width: 640px; }
+    h1 { margin: 0; font-size: 24px; }
     ul {
       list-style: none;
       margin: 0 auto;
@@ -50,13 +59,15 @@
     a:focus-visible img { outline: 3px solid var(--accent); outline-offset: 3px; }
     a span { display: block; margin-top: 8px; font-weight: 600; }
   </style>
-  <link rel="icon" href="word-connect/icon.svg">
+  <link rel="icon" href="icon.svg">
 </head>
 <body>
-  <h1>Papapps</h1>
+  <header><h1>Papapps</h1></header>
   <ul id="games"></ul>
   <script type="module">
     import { GAMES } from './games.js';
+    import { installButton } from './shared/install.js';
+    document.querySelector('header').append(installButton());
     document.getElementById('games').replaceChildren(
       ...GAMES.map((game) => {
         const li = document.createElement('li');

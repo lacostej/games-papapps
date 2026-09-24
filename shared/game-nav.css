@@ -29,3 +29,46 @@
 .game-nav a:focus-visible { outline: 2px solid var(--accent, #e0673b); outline-offset: 2px; }
 .game-nav img { width: 100%; height: 100%; display: block; }
 .game-nav-home svg { width: 22px; height: 22px; fill: currentColor; opacity: 0.75; }
+
+.install-button {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  margin-left: auto;
+  border: 0;
+  border-radius: 10px;
+  background: var(--surface, #fff);
+  color: var(--ink, #2b2622);
+  box-shadow: var(--shadow, 0 1px 3px rgb(0 0 0 / 0.12));
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.install-button[hidden] { display: none; }
+.install-button:focus-visible { outline: 2px solid var(--accent, #e0673b); outline-offset: 2px; }
+.install-button svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.install-dialog {
+  border: 0;
+  border-radius: 16px;
+  background: var(--surface, #fff);
+  color: var(--ink, #2b2622);
+  width: min(92vw, 360px);
+  font: 16px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.install-dialog::backdrop { background: rgb(0 0 0 / 0.4); }
+.install-dialog h2 { margin: 0 0 8px; font-size: 18px; }
+.install-dialog p { margin: 0; }
+.install-dialog form { text-align: right; margin-top: 16px; }
+.install-dialog form button {
+  font: inherit;
+  color: var(--ink, #2b2622);
+  background: var(--surface, #fff);
+  border: 0;
+  border-radius: 999px;
+  padding: 0.5em 1.2em;
+  box-shadow: var(--shadow, 0 1px 3px rgb(0 0 0 / 0.12));
+  cursor: pointer;
+}

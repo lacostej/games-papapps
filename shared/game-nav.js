@@ -1,6 +1,7 @@
 // Game menu: fills every <nav data-game-nav="<current game id>"> with square game
 // buttons. Links resolve from this file's location, so the site works under any base path.
 import { GAMES } from '../games.js';
+import { installButton } from './install.js';
 
 const root = new URL('../', import.meta.url);
 const HOME_LABEL = { en: 'All games', fr: 'Tous les jeux' };
@@ -21,7 +22,7 @@ export function renderGameNav(nav, current) {
     a.append(Object.assign(document.createElement('img'), { src: new URL(game.icon, root).href, alt: '' }));
     return a;
   });
-  nav.replaceChildren(home, ...games);
+  nav.replaceChildren(home, ...games, installButton());
 }
 
 function link(url, label) {
