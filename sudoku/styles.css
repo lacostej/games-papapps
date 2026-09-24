@@ -145,6 +145,19 @@ main {
 .cell:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
 .cell.selected:focus-visible { outline-color: var(--ink); }
 
+.notes {
+  align-self: stretch;
+  justify-self: stretch;
+  display: grid;
+  grid-template: repeat(var(--box-rows), minmax(0, 1fr)) / repeat(var(--box-cols), minmax(0, 1fr));
+  place-items: center;
+  font-size: min(calc(var(--side) / var(--n) / var(--box-cols) * 0.8), calc(var(--side) / var(--n) * 0.3));
+  font-weight: 500;
+  color: var(--muted);
+}
+.notes .same { color: var(--accent); font-weight: 800; }
+.cell.selected .notes, .cell.selected .notes .same { color: var(--accent-ink); }
+
 .board.complete { background: var(--good); animation: pop 0.5s ease-out; }
 .board.complete .cell { background: var(--surface); color: var(--good); }
 
@@ -166,13 +179,31 @@ main {
 .pad button.done { opacity: 0.35; }
 .pad button:disabled { opacity: 0.35; cursor: default; }
 .pad .erase { font-size: 20px; color: var(--muted); }
+/* In note mode the keys show their symbol small and in a corner, like a note. */
+.pad.noting button:not(.erase) { font-size: 15px; font-weight: 500; color: var(--muted); display: grid; place-items: start; padding: 5px 8px; }
 @media (max-width: 420px) {
   .pad { gap: 4px; }
   .pad button { height: 44px; font-size: 19px; }
 }
 
 .actions { display: flex; gap: 12px; margin-top: 12px; }
-.actions button { height: 44px; }
+.actions button { height: 44px; white-space: nowrap; }
+.toggle { display: flex; align-items: center; gap: 6px; }
+.toggle svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linejoin: round; }
+.toggle[aria-pressed='true'] { background: var(--accent); color: var(--accent-ink); }
+@media (max-width: 400px) {
+  .actions { gap: 8px; }
+  .actions button { padding: 0.5em 0.8em; }
+}
+/* Too narrow for three labels: the pencil alone, still named for screen readers.
+   French labels are longer, so they give way sooner. */
+@media (max-width: 399px) {
+  :lang(fr) .toggle span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+}
+@media (max-width: 359px) {
+  .toggle span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .actions button { font-size: 15px; }
+}
 
 @keyframes pop { 0% { transform: scale(0.96); } 60% { transform: scale(1.02); } 100% { transform: scale(1); } }
 

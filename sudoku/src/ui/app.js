@@ -13,6 +13,7 @@ const ui = {
   status: $('status'),
   board: $('board'),
   pad: $('pad'),
+  notes: $('notes'),
 };
 
 const t = translator(pickUiLanguage(navigator.languages ?? [navigator.language]));
@@ -42,6 +43,7 @@ ui.symbols.addEventListener('change', () => {
   save();
 });
 $('new').addEventListener('click', () => newGame());
+ui.notes.addEventListener('click', () => setNoting(!noting()));
 $('restart').addEventListener('click', () => {
   const entered = board.values.some((v, i) => v && !board.isGiven(i));
   if (entered && !confirm(t('confirmRestart'))) return;
@@ -124,6 +126,15 @@ function select(i, focus = false) {
   else if (i < 0 && cells.includes(document.activeElement)) document.activeElement.blur();
 }
 
+function noting() {
+  return ui.notes.getAttribute('aria-pressed') === 'true';
+}
+
+function setNoting(on) {
+  ui.notes.setAttribute('aria-pressed', String(on));
+  ui.pad.classList.toggle('noting', on);
+}
+
 function setPeek(v) {
   if (peek === v) return;
   peek = v;
@@ -131,10 +142,14 @@ function setPeek(v) {
 }
 
 // Tapping the value a cell already holds clears it.
-function enter(v) {
+// `note` toggles v as a note instead; v = 0 erases.
+function enter(v, note = noting()) {
   if (selected < 0 || board.solved) return;
-  const value = v && board.values[selected] === v ? 0 : v;
-  if (!board.set(selected, value)) return;
+  let changed;
+  if (!v) changed = board.clear(selected);
+  else if (note) changed = board.toggleNote(selected, v);
+  else changed = board.set(selected, board.values[selected] === v ? 0 : v);
+  if (!changed) return;
   render();
   save();
   if (board.solved) navigator.vibrate?.([15, 40, 15, 40, 60]);
@@ -153,15 +168,17 @@ function onKey(e) {
     return select(r * n + c, true);
   }
   if (e.key === 'Escape') return select(-1);
+  if (e.key.toUpperCase() === 'N') return setNoting(!noting());
   if (['Backspace', 'Delete', '0', ' '].includes(e.key)) {
     e.preventDefault();
     return enter(0);
   }
-  // Digits work with every symbol set; letters too.
-  const digit = Number(e.key);
+  // Digits work with every symbol set; letters too. Shift flips between value and note;
+  // with Shift held, e.key is a punctuation mark, so digits come from e.code.
+  const digit = Number(e.code.match(/^(?:Digit|Numpad)(\d)$/)?.[1] ?? e.key);
   const letter = e.key.length === 1 ? e.key.toUpperCase().charCodeAt(0) - 64 : 0;
   const v = digit >= 1 && digit <= n ? digit : letter >= 1 && letter <= n ? letter : 0;
-  if (v) enter(v);
+  if (v) enter(v, noting() !== e.shiftKey);
 }
 
 function render() {
@@ -173,7 +190,8 @@ function render() {
     selected >= 0 && (g.rowOf[i] === g.rowOf[selected] || g.colOf[i] === g.colOf[selected] || g.boxOf[i] === g.boxOf[selected]);
   cells.forEach((cell, i) => {
     const v = values[i];
-    cell.textContent = v ? shown[v - 1] : '';
+    if (v || !board.notes[i]) cell.textContent = v ? shown[v - 1] : '';
+    else cell.replaceChildren(renderNotes(i, shown, value));
     cell.className = [
       'cell',
       board.isGiven(i) ? 'given' : v && 'entered',
@@ -183,7 +201,9 @@ function render() {
       .filter(Boolean)
       .join(' ');
     cell.tabIndex = i === selected || (selected < 0 && i === 0) ? 0 : -1;
-    cell.setAttribute('aria-label', t('cell', { row: g.rowOf[i] + 1, col: g.colOf[i] + 1, value: v ? shown[v - 1] : t('empty') }));
+    const noted = shown.slice(0, n).filter((_, k) => board.hasNote(i, k + 1));
+    const content = v ? shown[v - 1] : noted.length ? t('notesList', { list: noted.join(' ') }) : t('empty');
+    cell.setAttribute('aria-label', t('cell', { row: g.rowOf[i] + 1, col: g.colOf[i] + 1, value: content }));
   });
 
   const counts = board.counts();
@@ -196,6 +216,19 @@ function render() {
   ui.board.classList.toggle('complete', board.solved);
   ui.status.classList.toggle('solved', board.solved);
   ui.status.textContent = board.solved ? t('solved') : t('cellsLeft', { level: t(board.level), count: counts[0] });
+}
+
+// One slot per value, laid out like a box, so each note keeps its place.
+function renderNotes(i, shown, highlighted) {
+  const notes = Object.assign(document.createElement('span'), { className: 'notes' });
+  notes.setAttribute('aria-hidden', 'true');
+  for (let v = 1; v <= board.n; v++) {
+    const on = board.hasNote(i, v);
+    const note = Object.assign(document.createElement('span'), { textContent: on ? shown[v - 1] : '' });
+    if (on && v === highlighted) note.className = 'same';
+    notes.append(note);
+  }
+  return notes;
 }
 
 function loadSaved() {

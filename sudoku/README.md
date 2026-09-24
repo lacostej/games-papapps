@@ -2,6 +2,8 @@
 
 4×4, 6×6 and 9×9 grids (2×2, 2×3 and 3×3 boxes), drawn as digits, letters or fruit. Grids are generated in the browser; progress is kept in `localStorage`.
 
+Pencil notes: the Notes toggle (or `N`, or Shift with a symbol) marks candidates in empty cells. Placing a value removes it from the notes of its row, column and box.
+
 ```
 npm start   # serves on :8080
 npm test
