@@ -57,6 +57,10 @@ ui.uiLanguage.addEventListener('change', () => savePrefs() && applyUiLanguage())
 $('shuffle').addEventListener('click', () => { stats.shuffles += 1; wheel.shuffle(); });
 $('new').addEventListener('click', () => start());
 $('open-panel').addEventListener('click', () => { renderPanel(); ui.panel.showModal(); });
+// Close on a backdrop tap; require the press to start there too, so a drag out of the panel doesn't close it.
+let pressedBackdrop = false;
+ui.panel.addEventListener('pointerdown', (e) => { pressedBackdrop = onBackdrop(e); });
+ui.panel.addEventListener('click', (e) => { if (pressedBackdrop && onBackdrop(e)) ui.panel.close(); });
 ui.hitScale.addEventListener('input', () => {
   wheel.setDragHitScale(Number(ui.hitScale.value));
   renderHitScale();
@@ -143,6 +147,13 @@ function renderHitScale() {
     set: percent(Number(ui.hitScale.value)),
     used: percent(wheel.dragHitRadius / wheel.tileRadius),
   });
+}
+
+// Padding clicks also target the dialog itself, so test against its box.
+function onBackdrop(e) {
+  if (e.target !== ui.panel) return false;
+  const r = ui.panel.getBoundingClientRect();
+  return e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom;
 }
 
 function renderPanel() {
