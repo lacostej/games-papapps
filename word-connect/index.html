@@ -17,6 +17,9 @@
   <header class="toolbar">
     <select id="language" data-i18n-label="wordLanguage"></select>
     <select id="size" data-i18n-label="letterCount"></select>
+    <button id="crossword" class="icon toggle" aria-pressed="false" data-i18n-label="crosswordMode">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1 5h4v4H1zM5 5h4v4H5zM9 5h4v4H9zM5 1h4v4H5zM5 9h4v4H5zM9 9h4v4H9z" /></svg>
+    </button>
     <div class="score" aria-live="polite"><span id="score">0</span><span class="unit" data-i18n="points"></span></div>
     <button id="open-panel" class="icon" data-i18n-label="openPanel">⋯</button>
   </header>
@@ -24,6 +27,7 @@
   <main>
     <section class="found">
       <p id="progress" class="progress"></p>
+      <div id="grid-box" class="grid-box" hidden><svg id="grid"></svg></div>
       <ul id="found-list"></ul>
     </section>
 
