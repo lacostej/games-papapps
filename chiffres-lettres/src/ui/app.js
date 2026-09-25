@@ -1,5 +1,5 @@
 import { pickUiLanguage, translateDom, translator, WORD_LANGUAGES } from './i18n.js';
-import { bestWords, canSpell, commonFirst, drawLetter, LETTER_COUNT } from '../core/letters.js';
+import { bestWords, canSpell, commonFirst, drawLetter, LETTER_COUNTS } from '../core/letters.js';
 import { Calculation, drawNumbers, numbersScore, OPS, solve } from '../core/numbers.js';
 import { lettersScore, MODES, ROUND_SECONDS, roundKind } from '../core/session.js';
 
@@ -61,6 +61,7 @@ function startRound(index) {
   } else {
     round.letters = [];
     round.picked = [];
+    round.size = saved.letterCount;
     waitForPack();
   }
 }
@@ -128,10 +129,10 @@ function toAnswer(timeUp = false) {
 }
 
 async function pickLetter(kind) {
-  if (round.pack !== 'ready' || round.phase !== 'draw' || round.letters.length >= LETTER_COUNT) return;
+  if (round.pack !== 'ready' || round.phase !== 'draw' || round.letters.length >= round.size) return;
   const pack = await loadPack(ui.language.value);
   round.letters.push(drawLetter(kind === 'vowel' ? pack.vowels : pack.consonants));
-  if (round.letters.length === LETTER_COUNT) startThinking();
+  if (round.letters.length === round.size) startThinking();
   else render();
 }
 
@@ -185,10 +186,10 @@ function render() {
 // Letters -----------------------------------------------------------------------------
 
 function tiles(onTap) {
-  return el(
+  const row = el(
     'div',
     { className: 'tiles' },
-    ...Array.from({ length: LETTER_COUNT }, (_, i) => {
+    ...Array.from({ length: round.size }, (_, i) => {
       const letter = round.letters[i];
       const used = round.picked?.includes(i);
       const tile = el(onTap && letter ? 'button' : 'span', { className: `tile ${letter ? '' : 'empty'} ${used ? 'used' : ''}` }, letter ?? '');
@@ -199,6 +200,27 @@ function tiles(onTap) {
       return tile;
     }),
   );
+  row.style.setProperty('--count', round.size);
+  return row;
+}
+
+// Only offered before the first letter, so a round never changes size once started.
+function letterCountSwitch() {
+  return el(
+    'div',
+    { className: 'count' },
+    el('span', {}, t('letterCount')),
+    ...LETTER_COUNTS.map((n) => {
+      const b = button(t.number(n), () => {
+        saved.letterCount = n;
+        round.size = n;
+        save();
+        render();
+      });
+      b.setAttribute('aria-pressed', String(n === round.size));
+      return b;
+    }),
+  );
 }
 
 function renderLetters() {
@@ -207,7 +229,7 @@ function renderLetters() {
       return [tiles(), el('p', { className: 'hint alert' }, t('loadFailed')), el('div', { className: 'choices' }, button(t('retry'), waitForPack, 'big primary'))];
     }
     const loading = round.pack !== 'ready';
-    const left = LETTER_COUNT - round.letters.length;
+    const left = round.size - round.letters.length;
     return [
       tiles(),
       el('p', { className: 'hint' }, loading ? t('loading') : t('pickLetters', { count: left })),
@@ -217,6 +239,7 @@ function renderLetters() {
         button(t('vowel'), () => pickLetter('vowel'), 'big', undefined, loading),
         button(t('consonant'), () => pickLetter('consonant'), 'big', undefined, loading),
       ),
+      round.letters.length ? '' : letterCountSwitch(),
     ];
   }
   if (round.phase === 'think') {
@@ -384,12 +407,13 @@ function onKey(e) {
 
 function loadSaved() {
   const uiLanguage = pickUiLanguage(navigator.languages ?? [navigator.language]);
-  const defaults = { mode: 'both', language: uiLanguage, index: 0, score: { you: 0, computer: 0 } };
+  const defaults = { mode: 'both', language: uiLanguage, letterCount: 9, index: 0, score: { you: 0, computer: 0 } };
   try {
     const s = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}');
     return {
       mode: MODES[s.mode] ? s.mode : defaults.mode,
       language: WORD_LANGUAGES.some((l) => l.code === s.language) ? s.language : defaults.language,
+      letterCount: LETTER_COUNTS.includes(s.letterCount) ? s.letterCount : defaults.letterCount,
       index: Number.isInteger(s.index) && s.index >= 0 ? s.index : defaults.index,
       score: { ...defaults.score, ...s.score },
     };
@@ -400,7 +424,10 @@ function loadSaved() {
 
 function save() {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ mode: ui.mode.value, language: ui.language.value, index: saved.index, score }));
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ mode: ui.mode.value, language: ui.language.value, letterCount: saved.letterCount, index: saved.index, score }),
+    );
   } catch {
     // Private mode: nothing persists.
   }

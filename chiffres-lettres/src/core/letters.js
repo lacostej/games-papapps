@@ -1,5 +1,6 @@
 export const VOWELS = ['A', 'E', 'I', 'O', 'U'];
-export const LETTER_COUNT = 10;
+// Letters per draw; 9 as in the original show, 10 as a harder option.
+export const LETTER_COUNTS = [9, 10];
 
 // A random letter, weighted by how often it appears in the language's words.
 export function drawLetter(weights, random = Math.random) {

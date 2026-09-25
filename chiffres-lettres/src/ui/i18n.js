@@ -14,6 +14,7 @@ export const MESSAGES = {
     roundLetters: 'Round {n} · Letters',
     vowel: 'Vowel',
     consonant: 'Consonant',
+    letterCount: 'Letters',
     pickLetters: { one: 'Pick {count} more letter', other: 'Pick {count} more letters' },
     target: 'Target',
     answer: 'Answer',
@@ -55,6 +56,7 @@ export const MESSAGES = {
     roundLetters: 'Manche {n} · Lettres',
     vowel: 'Voyelle',
     consonant: 'Consonne',
+    letterCount: 'Lettres',
     pickLetters: { one: 'Encore {count} lettre', other: 'Encore {count} lettres' },
     target: 'À trouver',
     answer: 'Répondre',
@@ -85,10 +87,9 @@ export const MESSAGES = {
   },
 };
 
-// Short labels: the toolbar also holds the mode and the score on a 320 px screen.
 export const WORD_LANGUAGES = [
-  { code: 'fr', name: 'FR' },
-  { code: 'en', name: 'EN' },
+  { code: 'en', name: 'English' },
+  { code: 'fr', name: 'Français' },
 ];
 
 // First supported language in the browser's preference list, else English.

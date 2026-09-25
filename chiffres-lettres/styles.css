@@ -130,7 +130,7 @@ main {
 .tiles {
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(10, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--count), minmax(0, 1fr));
   gap: 4px;
 }
 .tile {
@@ -163,6 +163,11 @@ main {
 .hint.alert { color: var(--bad); font-weight: 600; }
 
 .choices { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+
+/* 9 · 10 letters switch, shown before the first letter is drawn. */
+.count { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 14px; }
+.count button { min-width: 44px; padding: 0.35em 0.8em; }
+.count button[aria-pressed='true'] { background: var(--ink); color: var(--bg); }
 .choices .big { font-size: 20px; padding: 0.7em 1.4em; }
 .choices .icon { width: 48px; padding: 0.5em 0; }
 .primary { background: var(--accent); color: var(--accent-ink); }
