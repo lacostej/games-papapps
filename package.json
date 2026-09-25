@@ -2,7 +2,7 @@
   "name": "papapps",
   "private": true,
   "type": "module",
-  "workspaces": ["word-connect", "sudoku", "hangman", "chiffres-lettres"],
+  "workspaces": ["word-connect", "sudoku", "hangman", "chiffres-lettres", "trio"],
   "scripts": {
     "start": "node serve.mjs",
     "test": "npm test --workspaces"

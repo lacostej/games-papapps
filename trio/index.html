@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Trio</title>
+  <link rel="icon" href="icon.svg">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+  <meta name="theme-color" content="#f6f1e9" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1c1917" media="(prefers-color-scheme: dark)">
+  <link rel="stylesheet" href="../shared/game-nav.css">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="../shared/game-nav.js"></script>
+  <script type="module" src="src/ui/app.js"></script>
+</head>
+<body>
+  <nav data-game-nav="trio"></nav>
+  <header class="toolbar">
+    <div class="stat"><span data-i18n="time"></span><b id="time">0:00</b></div>
+    <div class="stat"><span data-i18n="trios"></span><b id="found">0</b></div>
+    <div class="stat"><span data-i18n="deck"></span><b id="deck">81</b></div>
+  </header>
+
+  <!-- Stripe patterns for the striped shading, one per colour. -->
+  <svg class="defs" aria-hidden="true" width="0" height="0">
+    <defs>
+      <pattern id="stripes-0" width="4" height="4" patternUnits="userSpaceOnUse"><path class="c0" d="M0 2H4" /></pattern>
+      <pattern id="stripes-1" width="4" height="4" patternUnits="userSpaceOnUse"><path class="c1" d="M0 2H4" /></pattern>
+      <pattern id="stripes-2" width="4" height="4" patternUnits="userSpaceOnUse"><path class="c2" d="M0 2H4" /></pattern>
+    </defs>
+  </svg>
+
+  <main>
+    <p id="status" class="status" aria-live="polite"></p>
+    <div id="table" class="table" role="group" data-i18n-label="table"></div>
+    <div class="actions">
+      <button id="hint"><span data-i18n="hint"></span> <small id="hint-cost"></small></button>
+      <button id="new" data-i18n="newGame"></button>
+    </div>
+  </main>
+</body>
+</html>
