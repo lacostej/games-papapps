@@ -19,6 +19,10 @@ let game;
 let clock;
 let selected = [];
 let hinted = [];
+// The buttons on screen and the cards they show; rebuilt only when the table changes, so
+// hint and selection animations aren't restarted by every tap.
+let buttons = [];
+let shown = [];
 
 document.documentElement.lang = t.code;
 translateDom(document, t);
@@ -45,6 +49,7 @@ if (saved.game) {
 
 function newGame() {
   game = new Game();
+  shown = [];
   clock = { before: 0, since: Date.now() };
   selected = [];
   hinted = [];
@@ -136,19 +141,33 @@ function render({ wrong = [], fresh = [] } = {}) {
   ui.deck.textContent = t.number(game.deck.length);
   ui.hint.disabled = game.over;
   ui.table.style.setProperty('--rows', Math.ceil(game.table.length / 3));
-  ui.table.replaceChildren(
-    ...game.table.map((c, i) => {
+  if (buttons.length !== game.table.length) {
+    buttons = game.table.map((_, i) => {
       const button = document.createElement('button');
-      button.className = ['card', selected.includes(i) && 'selected', hinted.includes(i) && 'hinted', wrong.includes(i) && 'wrong', fresh.includes(i) && 'fresh']
-        .filter(Boolean)
-        .join(' ');
-      button.setAttribute('aria-pressed', String(selected.includes(i)));
-      button.setAttribute('aria-label', label(c));
-      button.append(drawCard(c));
       button.addEventListener('click', () => tap(i));
       return button;
-    }),
-  );
+    });
+    shown = [];
+    ui.table.replaceChildren(...buttons);
+  }
+  game.table.forEach((c, i) => {
+    const button = buttons[i];
+    if (shown[i] !== c) {
+      button.replaceChildren(drawCard(c));
+      button.setAttribute('aria-label', label(c));
+      shown[i] = c;
+    }
+    button.className = 'card';
+    button.classList.toggle('selected', selected.includes(i));
+    button.classList.toggle('hinted', hinted.includes(i));
+    button.setAttribute('aria-pressed', String(selected.includes(i)));
+    // One-off animations restart only for the cards they concern.
+    for (const [name, on] of [['wrong', wrong.includes(i)], ['fresh', fresh.includes(i)]]) {
+      if (!on) continue;
+      void button.offsetWidth;
+      button.classList.add(name);
+    }
+  });
 }
 
 function label(c) {
