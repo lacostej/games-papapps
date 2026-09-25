@@ -1,0 +1,144 @@
+:root {
+  --bg: #f6f1e9;
+  --surface: #ffffff;
+  --ink: #2b2622;
+  --muted: #8a8078;
+  --accent: #e0673b;
+  --accent-ink: #ffffff;
+  --good: #2f9e6a;
+  --bad: #d14343;
+  --tile: #fffdf5;
+  /* Lower layers are a little darker, so height reads at a glance. */
+  --tile-z0: #efe6d0;
+  --tile-z1: #f7f1e3;
+  --tile-z2: #fcf9f0;
+  --tile-edge: #c9b98f;
+  --tile-edge-dark: #a8966a;
+  --shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1c1917;
+    --surface: #292524;
+    --ink: #f3ede6;
+    --muted: #a39a91;
+    --accent: #f07a4f;
+    --bad: #f07070;
+    --tile-edge: #8f7f5a;
+    --tile-edge-dark: #6e6146;
+    --shadow: 0 1px 3px rgb(0 0 0 / 0.5);
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  overscroll-behavior: none;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+button, select {
+  font: inherit;
+  color: var(--ink);
+  background: var(--surface);
+  border: 0;
+  border-radius: 999px;
+  padding: 0.5em 1em;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+}
+button:disabled { opacity: 0.45; cursor: default; }
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px 4px;
+}
+.toolbar select { padding: 0.4em 0.8em; font-size: 14px; margin-right: auto; }
+.stat { display: flex; flex-direction: column; align-items: center; line-height: 1.2; min-width: 3.5em; }
+.stat span { font-size: 12px; color: var(--muted); }
+.stat b { font-size: 20px; font-variant-numeric: tabular-nums; }
+
+main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 12px 12px;
+}
+
+.status { min-height: 2.6em; margin: 4px 0; text-align: center; font-size: 14px; color: var(--muted); display: grid; place-items: center; }
+.status.bad { color: var(--bad); font-weight: 600; }
+.status.done { color: var(--good); font-weight: 700; font-size: 16px; }
+
+/* The board is scaled in JS to the largest size that fits this box. */
+.board-box {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: grid;
+  place-items: center;
+}
+.board { position: relative; }
+
+/* A small gap and an outline keep neighbouring tiles apart. */
+.tile {
+  position: absolute;
+  width: calc(var(--w) - 2px);
+  height: calc(var(--w) * 4 / 3 - 2px);
+  padding: 0;
+  border: 1px solid rgb(0 0 0 / 0.18);
+  border-radius: calc(var(--w) * 0.1);
+  background: var(--tile);
+  /* The edge shows the tile's thickness, so stacks read as layers. */
+  box-shadow: calc(var(--w) * 0.06) calc(var(--w) * 0.06) 0 var(--tile-edge), calc(var(--w) * 0.1) calc(var(--w) * 0.1) 0 var(--tile-edge-dark);
+  overflow: visible;
+}
+.tile[hidden] { display: none; }
+.tile.z0 { background: var(--tile-z0); }
+.tile.z1 { background: var(--tile-z1); }
+.tile.z2 { background: var(--tile-z2); }
+.tile svg { width: 100%; height: 100%; display: block; border-radius: inherit; }
+.tile.blocked svg { opacity: 0.55; }
+.tile.selected { background: #ffd9c7; outline: 3px solid var(--accent); outline-offset: -1px; }
+.tile.hinted { outline: 3px solid var(--good); outline-offset: -1px; animation: pulse 1s ease-in-out 2; }
+.tile.nope { animation: shake 0.3s ease-in-out; }
+.tile:focus-visible { outline: 3px solid var(--ink); outline-offset: -1px; }
+
+.actions { display: flex; gap: 8px; margin-top: 12px; }
+.actions button { height: 44px; white-space: nowrap; padding: 0.5em 0.9em; }
+.primary { background: var(--accent); color: var(--accent-ink); }
+@media (max-width: 360px) {
+  .actions { gap: 6px; }
+  .actions button { padding: 0.5em 0.6em; font-size: 15px; }
+}
+
+@keyframes pulse { 50% { transform: translateY(-3px); } }
+@keyframes shake {
+  25% { transform: translateX(-3px); }
+  75% { transform: translateX(3px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

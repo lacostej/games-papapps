@@ -5,4 +5,5 @@ export const GAMES = [
   { id: 'hangman', name: 'Hangman', path: 'hangman/', icon: 'hangman/icon.svg' },
   { id: 'chiffres-lettres', name: 'Chiffres & Lettres', path: 'chiffres-lettres/', icon: 'chiffres-lettres/icon.svg' },
   { id: 'trio', name: 'Trio', path: 'trio/', icon: 'trio/icon.svg' },
+  { id: 'mahjong', name: 'Mahjong', path: 'mahjong/', icon: 'mahjong/icon.svg' },
 ];

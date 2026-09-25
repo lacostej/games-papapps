@@ -7,6 +7,7 @@ Small browser games, one folder each, published at https://lacostej.github.io/ga
 - [hangman](hangman/): guess a word letter by letter, English or French, with a category hint.
 - [chiffres-lettres](chiffres-lettres/): Des chiffres et des lettres: longest word from 9 or 10 letters, reach a target from 6 numbers, against the computer.
 - [trio](trio/): find three cards where every feature is all the same or all different, racing through the 81-card deck (the rules of the card game Set).
+- [mahjong](mahjong/): Mahjong solitaire on portrait layouts, every deal solvable.
 
 ```
 npm start   # serves the whole site on :8080, with the LAN URL for phones
