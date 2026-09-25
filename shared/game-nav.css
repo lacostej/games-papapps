@@ -1,11 +1,17 @@
 /* Uses the page's --surface/--ink/--accent/--shadow tokens when it defines them. */
+/* One row that scrolls sideways once there are more games than fit, so the page never does. */
 .game-nav {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 16px 0;
+  padding: 8px 16px 4px;
   min-height: 48px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  flex: none;
 }
+.game-nav::-webkit-scrollbar { display: none; }
 
 .game-nav a {
   width: 40px;

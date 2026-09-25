@@ -23,6 +23,9 @@ export function renderGameNav(nav, current) {
     return a;
   });
   nav.replaceChildren(home, ...games, installButton());
+  // With more games than fit, keep the current one in view.
+  const active = nav.querySelector('[aria-current="page"]');
+  if (active) nav.scrollLeft = active.offsetLeft - (nav.clientWidth - active.offsetWidth) / 2;
 }
 
 function link(url, label) {
