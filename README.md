@@ -5,6 +5,7 @@ Small browser games, one folder each, published at https://lacostej.github.io/ga
 - [word-connect](word-connect/): swipe letters on a wheel to form words.
 - [sudoku](sudoku/): 4×4, 6×6 and 9×9 grids in digits, letters or fruit, four difficulty levels.
 - [hangman](hangman/): guess a word letter by letter, English or French, with a category hint.
+- [chiffres-lettres](chiffres-lettres/): Des chiffres et des lettres: longest word from 10 letters, reach a target from 6 numbers, against the computer.
 
 ```
 npm start   # serves the whole site on :8080, with the LAN URL for phones

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Des chiffres et des lettres</title>
+  <link rel="icon" href="icon.svg">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+  <meta name="theme-color" content="#f6f1e9" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1c1917" media="(prefers-color-scheme: dark)">
+  <link rel="stylesheet" href="../shared/game-nav.css">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="../shared/game-nav.js"></script>
+  <script type="module" src="src/ui/app.js"></script>
+</head>
+<body>
+  <nav data-game-nav="chiffres-lettres"></nav>
+  <header class="toolbar">
+    <select id="mode" data-i18n-label="mode"></select>
+    <select id="language" data-i18n-label="wordLanguage"></select>
+    <button id="score" class="score" data-i18n-label="resetScore"></button>
+  </header>
+
+  <main>
+    <div class="round-head">
+      <p id="round" class="round"></p>
+      <div id="timer" class="timer" role="timer" hidden><span></span><div class="bar"><div></div></div></div>
+    </div>
+    <section id="stage" class="stage" aria-live="polite"></section>
+  </main>
+</body>
+</html>
