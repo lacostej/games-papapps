@@ -2,14 +2,16 @@ import { geometry } from './sudoku.js';
 
 // A puzzle being played: the givens are fixed, the player fills the other cells.
 // Notes are candidate bitmasks per cell (bit v-1 for v), shown only in empty cells.
+// Every change first saves the previous values and notes, so undo can restore them.
 export class Board {
-  constructor({ n, level, givens, solution, values = givens, notes = new Array(n * n).fill(0) }) {
+  constructor({ n, level, givens, solution, values = givens, notes = new Array(n * n).fill(0), history = [] }) {
     this.n = n;
     this.level = level;
     this.givens = givens.slice();
     this.solution = solution.slice();
     this.values = values.slice();
     this.notes = notes.slice();
+    this.history = history.slice();
     this.geometry = geometry(n);
   }
 
@@ -20,6 +22,7 @@ export class Board {
   // Returns whether the cell changed. Placing a value drops it from the peers' notes.
   set(i, v) {
     if (this.isGiven(i) || this.values[i] === v) return false;
+    this.#record();
     this.values[i] = v;
     if (v) {
       this.notes[i] = 0;
@@ -32,6 +35,7 @@ export class Board {
   clear(i) {
     if (this.values[i]) return this.set(i, 0);
     if (!this.notes[i]) return false;
+    this.#record();
     this.notes[i] = 0;
     return true;
   }
@@ -42,13 +46,33 @@ export class Board {
 
   toggleNote(i, v) {
     if (this.values[i]) return false;
+    this.#record();
     this.notes[i] ^= 1 << (v - 1);
     return true;
   }
 
   restart() {
+    if (this.values.every((v, i) => v === this.givens[i]) && !this.notes.some(Boolean)) return false;
+    this.#record();
     this.values = this.givens.slice();
     this.notes.fill(0);
+    return true;
+  }
+
+  get canUndo() {
+    return this.history.length > 0;
+  }
+
+  undo() {
+    const last = this.history.pop();
+    if (!last) return false;
+    this.values = last.values;
+    this.notes = last.notes;
+    return true;
+  }
+
+  #record() {
+    this.history.push({ values: this.values.slice(), notes: this.notes.slice() });
   }
 
   // Cells whose value repeats in a row, column or box.
@@ -83,7 +107,7 @@ export class Board {
   }
 
   toJSON() {
-    const { n, level, givens, solution, values, notes } = this;
-    return { n, level, givens, solution, values, notes };
+    const { n, level, givens, solution, values, notes, history } = this;
+    return { n, level, givens, solution, values, notes, history };
   }
 }

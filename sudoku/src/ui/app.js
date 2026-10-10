@@ -14,6 +14,7 @@ const ui = {
   board: $('board'),
   pad: $('pad'),
   notes: $('notes'),
+  undo: $('undo'),
 };
 
 const t = translator(pickUiLanguage(navigator.languages ?? [navigator.language]));
@@ -47,10 +48,11 @@ ui.notes.addEventListener('click', () => setNoting(!noting()));
 $('restart').addEventListener('click', () => {
   const entered = board.values.some((v, i) => v && !board.isGiven(i));
   if (entered && !confirm(t('confirmRestart'))) return;
-  board.restart();
+  if (!board.restart()) return;
   render();
   save();
 });
+ui.undo.addEventListener('click', undo);
 document.addEventListener('keydown', onKey);
 
 if (saved.board) startBoard(saved.board);
@@ -155,7 +157,17 @@ function enter(v, note = noting()) {
   if (board.solved) navigator.vibrate?.([15, 40, 15, 40, 60]);
 }
 
+function undo() {
+  if (board.solved || !board.undo()) return;
+  render();
+  save();
+}
+
 function onKey(e) {
+  if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key.toLowerCase() === 'z') {
+    e.preventDefault();
+    return undo();
+  }
   if (e.metaKey || e.ctrlKey || e.altKey || e.target.tagName === 'SELECT') return;
   const { n, geometry: g } = board;
   const moves = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1] };
@@ -212,6 +224,7 @@ function render() {
     key.disabled = board.solved;
   });
   ui.pad.lastElementChild.disabled = board.solved;
+  ui.undo.disabled = board.solved || !board.canUndo;
 
   ui.board.classList.toggle('complete', board.solved);
   ui.status.classList.toggle('solved', board.solved);
@@ -240,7 +253,7 @@ function loadSaved() {
       size,
       symbols: SYMBOL_SETS.some((set) => set.id === s.symbols) ? s.symbols : defaults.symbols,
       level: typeof s.level === 'string' ? s.level : defaults.level,
-      board: s.board?.n === size && Array.isArray(s.board.values) ? s.board : null,
+      board: s.board?.n === size && Array.isArray(s.board.values) ? { ...s.board, history: Array.isArray(s.board.history) ? s.board.history : [] } : null,
     };
   } catch {
     return defaults;

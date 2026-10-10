@@ -92,3 +92,38 @@ test('notes survive a save, and saves without notes still load', () => {
   const { notes, ...old } = b.toJSON();
   assert.equal(new Board(old).notes.length, 16);
 });
+
+test('undo reverts values, notes, the notes a value cleared, and restart', () => {
+  const b = new Board({ n: 4, givens, solution });
+  b.toggleNote(2, 3);
+  b.toggleNote(2, 2);
+  b.set(1, 3);
+  assert.equal(b.hasNote(2, 3), false);
+  b.clear(2);
+  b.restart();
+  assert.equal(b.restart(), false);
+  const steps = [];
+  while (b.undo()) steps.push([b.values[1], b.notes[2]]);
+  assert.deepEqual(steps, [[3, 0], [3, 0b10], [0, 0b110], [0, 0b100], [0, 0]]);
+  assert.equal(b.canUndo, false);
+});
+
+test('a saved board keeps its undo history', () => {
+  const b = new Board({ n: 4, level: 'easy', givens, solution });
+  b.set(1, 2);
+  b.set(1, 3);
+  const restored = new Board(JSON.parse(JSON.stringify(b)));
+  restored.undo();
+  assert.equal(restored.values[1], 2);
+  restored.undo();
+  assert.equal(restored.values[1], 0);
+  assert.equal(restored.undo(), false);
+});
+
+test('rejected moves add no undo step', () => {
+  const b = new Board({ n: 4, givens, solution });
+  b.set(0, 2);
+  b.clear(1);
+  b.set(1, 0);
+  assert.equal(b.canUndo, false);
+});
