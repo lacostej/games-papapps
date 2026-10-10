@@ -338,7 +338,8 @@ function renderNumbers() {
       el(
         'div',
         { className: 'plates' },
-        ...calc.numbers.map((n) => {
+        ...calc.slots.map((n) => {
+          if (!n) return el('span', { className: 'plate empty' });
           const b = button(String(n.value), () => tapNumber(n), `plate ${n.id === pick.a ? 'selected' : ''} ${n.id >= round.plates.length ? 'made' : ''}`);
           return b;
         }),

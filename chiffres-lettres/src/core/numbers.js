@@ -56,6 +56,7 @@ export function solve(plates, target) {
 }
 
 // The player's working: numbers still available (plates and results) and the steps so far.
+// Each number keeps its slot: a result takes the slot of its first number, the second's empties.
 export class Calculation {
   constructor(plates) {
     this.plates = plates;
@@ -63,28 +64,35 @@ export class Calculation {
   }
 
   reset() {
-    this.numbers = this.plates.map((value, id) => ({ id, value }));
+    this.slots = this.plates.map((value, id) => ({ id, value }));
     this.steps = [];
     this.nextId = this.plates.length;
   }
 
+  get numbers() {
+    return this.slots.filter(Boolean);
+  }
+
   // Combines two available numbers by id; returns the new number, or null if not allowed.
   combine(aId, op, bId) {
-    const a = this.numbers.find((n) => n.id === aId);
-    const b = this.numbers.find((n) => n.id === bId);
-    if (!a || !b || a === b) return null;
+    const aSlot = this.slots.findIndex((n) => n?.id === aId);
+    const bSlot = this.slots.findIndex((n) => n?.id === bId);
+    if (aSlot < 0 || bSlot < 0 || aSlot === bSlot) return null;
+    const [a, b] = [this.slots[aSlot], this.slots[bSlot]];
     const result = apply(a.value, op, b.value);
     if (result === null) return null;
     const made = { id: this.nextId++, value: result };
-    this.numbers = [...this.numbers.filter((n) => n !== a && n !== b), made];
-    this.steps.push({ a, op, b, made });
+    this.slots[aSlot] = made;
+    this.slots[bSlot] = null;
+    this.steps.push({ a, op, b, made, aSlot, bSlot });
     return made;
   }
 
   undo() {
     const step = this.steps.pop();
     if (!step) return;
-    this.numbers = [...this.numbers.filter((n) => n !== step.made), step.a, step.b].sort((x, y) => x.id - y.id);
+    this.slots[step.aSlot] = step.a;
+    this.slots[step.bSlot] = step.b;
   }
 
   // Saved as the moves by id; replaying them gives the same ids again.

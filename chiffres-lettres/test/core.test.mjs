@@ -107,6 +107,17 @@ test('a calculation combines, undoes and announces the closest number', () => {
   assert.equal(calc.closest(20), 25);
 });
 
+test('a result takes the slot of its first number and the second slot empties, until undone', () => {
+  const calc = new Calculation([25, 50, 3, 7]);
+  const made = calc.combine(2, '×', 0);
+  assert.deepEqual(calc.slots.map((n) => n?.value ?? null), [null, 50, 75, 7]);
+  calc.combine(1, '+', made.id);
+  assert.deepEqual(calc.slots.map((n) => n?.value ?? null), [null, 125, null, 7]);
+  calc.undo();
+  calc.undo();
+  assert.deepEqual(calc.slots.map((n) => n?.value ?? null), [25, 50, 3, 7]);
+});
+
 test('a saved calculation replays to the same numbers, steps and ids', () => {
   const calc = new Calculation([25, 50, 3]);
   const made = calc.combine(1, '+', 0);
@@ -115,7 +126,7 @@ test('a saved calculation replays to the same numbers, steps and ids', () => {
   assert.deepEqual(restored.numbers, calc.numbers);
   assert.deepEqual(restored.steps, calc.steps);
   restored.undo();
-  assert.deepEqual(restored.numbers, [{ id: 2, value: 3 }, { id: 3, value: 75 }]);
+  assert.deepEqual(restored.numbers, [{ id: 3, value: 75 }, { id: 2, value: 3 }]);
   assert.throws(() => Calculation.from({ plates: [3, 7], moves: [[0, '-', 1]] }));
 });
 
