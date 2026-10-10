@@ -45,7 +45,7 @@ ui.score.addEventListener('click', () => {
 document.addEventListener('keydown', onKey);
 
 renderScore();
-startRound(saved.index);
+if (!resumeRound(saved.round)) startRound(saved.index);
 
 function startRound(index) {
   stopTimer();
@@ -53,7 +53,7 @@ function startRound(index) {
   round = { index, kind, phase: 'draw' };
   saved.index = index;
   save();
-  ui.round.textContent = t(kind === 'numbers' ? 'roundNumbers' : 'roundLetters', { n: t.number(index + 1) });
+  showRoundTitle();
   if (kind === 'numbers') {
     Object.assign(round, drawNumbers());
     round.calc = new Calculation(round.plates);
@@ -64,6 +64,29 @@ function startRound(index) {
     round.size = saved.letterCount;
     waitForPack();
   }
+}
+
+// A reload continues the saved round; its timer kept running meanwhile.
+function resumeRound(state) {
+  try {
+    if (!state || roundKind(ui.mode.value, state.index) !== state.kind) return false;
+    if (state.index !== saved.index && !(state.result && state.index + 1 === saved.index)) return false;
+    // Reloaded while the answer was being checked: check it again.
+    round = { ...state, phase: state.phase === 'result' && !state.result ? 'answer' : state.phase };
+    if (round.kind === 'numbers') round.calc = Calculation.from(round.calc);
+    showRoundTitle();
+    if (round.phase === 'think' && round.deadline > Date.now()) startThinking(round.deadline);
+    else if (round.phase === 'think') toAnswer(true);
+    else if (round.kind === 'letters' && round.phase === 'draw') waitForPack();
+    else render();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function showRoundTitle() {
+  ui.round.textContent = t(round.kind === 'numbers' ? 'roundNumbers' : 'roundLetters', { n: t.number(round.index + 1) });
 }
 
 // Letters can't be drawn before the dictionary (with the draw weights) has arrived.
@@ -95,9 +118,9 @@ function loadPack(code) {
   return packs.get(code);
 }
 
-function startThinking() {
+function startThinking(deadline = Date.now() + ROUND_SECONDS * 1000) {
   round.phase = 'think';
-  round.deadline = Date.now() + ROUND_SECONDS * 1000;
+  round.deadline = deadline;
   ui.timer.hidden = false;
   tick();
   timerId = setInterval(tick, 250);
@@ -178,9 +201,11 @@ function renderScore(bump = false) {
   }
 }
 
+// Every change to the round renders, so this is also where it is saved.
 function render() {
   const view = round.kind === 'numbers' ? renderNumbers() : renderLetters();
   ui.stage.replaceChildren(...view);
+  save();
 }
 
 // Letters -----------------------------------------------------------------------------
@@ -407,7 +432,7 @@ function onKey(e) {
 
 function loadSaved() {
   const uiLanguage = pickUiLanguage(navigator.languages ?? [navigator.language]);
-  const defaults = { mode: 'both', language: uiLanguage, letterCount: 9, index: 0, score: { you: 0, computer: 0 } };
+  const defaults = { mode: 'both', language: uiLanguage, letterCount: 9, index: 0, score: { you: 0, computer: 0 }, round: null };
   try {
     const s = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}');
     return {
@@ -416,6 +441,7 @@ function loadSaved() {
       letterCount: LETTER_COUNTS.includes(s.letterCount) ? s.letterCount : defaults.letterCount,
       index: Number.isInteger(s.index) && s.index >= 0 ? s.index : defaults.index,
       score: { ...defaults.score, ...s.score },
+      round: s.round && typeof s.round === 'object' ? s.round : null,
     };
   } catch {
     return defaults;
@@ -426,7 +452,7 @@ function save() {
   try {
     localStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify({ mode: ui.mode.value, language: ui.language.value, letterCount: saved.letterCount, index: saved.index, score }),
+      JSON.stringify({ mode: ui.mode.value, language: ui.language.value, letterCount: saved.letterCount, index: saved.index, score, round: round && { ...round, pack: undefined } }),
     );
   } catch {
     // Private mode: nothing persists.

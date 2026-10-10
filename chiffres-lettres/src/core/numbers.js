@@ -87,6 +87,17 @@ export class Calculation {
     this.numbers = [...this.numbers.filter((n) => n !== step.made), step.a, step.b].sort((x, y) => x.id - y.id);
   }
 
+  // Saved as the moves by id; replaying them gives the same ids again.
+  toJSON() {
+    return { plates: this.plates, moves: this.steps.map(({ a, op, b }) => [a.id, op, b.id]) };
+  }
+
+  static from({ plates, moves }) {
+    const calc = new Calculation(plates);
+    for (const [a, op, b] of moves) if (!calc.combine(a, op, b)) throw new Error('Invalid saved move');
+    return calc;
+  }
+
   // What the player announces: the available number closest to the target.
   closest(target) {
     return this.numbers.reduce((best, n) => (Math.abs(n.value - target) < Math.abs(best.value - target) ? n : best)).value;

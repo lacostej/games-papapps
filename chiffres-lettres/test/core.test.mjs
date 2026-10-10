@@ -107,6 +107,18 @@ test('a calculation combines, undoes and announces the closest number', () => {
   assert.equal(calc.closest(20), 25);
 });
 
+test('a saved calculation replays to the same numbers, steps and ids', () => {
+  const calc = new Calculation([25, 50, 3]);
+  const made = calc.combine(1, '+', 0);
+  calc.combine(made.id, '×', 2);
+  const restored = Calculation.from(JSON.parse(JSON.stringify(calc)));
+  assert.deepEqual(restored.numbers, calc.numbers);
+  assert.deepEqual(restored.steps, calc.steps);
+  restored.undo();
+  assert.deepEqual(restored.numbers, [{ id: 2, value: 3 }, { id: 3, value: 75 }]);
+  assert.throws(() => Calculation.from({ plates: [3, 7], moves: [[0, '-', 1]] }));
+});
+
 test('numbers score 10 when exact, one less per unit away', () => {
   assert.equal(numbersScore(500, 500), 10);
   assert.equal(numbersScore(497, 500), 7);
