@@ -21,12 +21,15 @@
   <header class="toolbar">
     <select id="language" data-i18n-label="wordLanguage"></select>
     <select id="mode" data-i18n-label="mode"></select>
-    <button id="score" class="score" data-i18n-label="resetScore"></button>
+    <select id="level" data-i18n-label="level"></select>
   </header>
 
   <main>
     <div class="round-head">
-      <p id="round" class="round"></p>
+      <div class="round-line">
+        <p id="round" class="round"></p>
+        <button id="score" class="score" data-i18n-label="resetScore"></button>
+      </div>
       <div id="timer" class="timer" role="timer" hidden><span></span><div class="bar"><div></div></div></div>
     </div>
     <section id="stage" class="stage" aria-live="polite"></section>

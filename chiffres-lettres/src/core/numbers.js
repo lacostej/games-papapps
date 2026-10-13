@@ -2,6 +2,11 @@
 // each plate used at most once.
 export const PLATES = [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 25, 50, 75, 100];
 export const OPS = ['+', '-', '×', '÷'];
+// Draw settings per level. Kids: five cards from 1-10 and 25, targets 10-200 (see docs/numbers-stats.md).
+export const LEVELS = {
+  normal: {},
+  kids: { pool: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 25], count: 5, min: 10, max: 200 },
+};
 
 export function drawNumbers(random = Math.random, { pool: from = PLATES, count = 6, min = 100, max = 999 } = {}) {
   const pool = [...from];

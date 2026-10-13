@@ -1,6 +1,6 @@
 import { pickUiLanguage, translateDom, translator, WORD_LANGUAGES } from './i18n.js';
 import { bestWords, canSpell, commonFirst, drawLetter, LETTER_COUNTS } from '../core/letters.js';
-import { Calculation, drawNumbers, numbersScore, OPS, solve } from '../core/numbers.js';
+import { Calculation, drawNumbers, LEVELS, numbersScore, OPS, solve } from '../core/numbers.js';
 import { lettersScore, MODES, ROUND_SECONDS, roundKind } from '../core/session.js';
 
 const STORAGE_KEY = 'chiffres-lettres';
@@ -9,7 +9,7 @@ const SHOWN_WORDS = 3;
 // Typographic signs for display; the core uses plain '-'.
 const SIGN = { '+': '+', '-': '−', '×': '×', '÷': '÷' };
 const $ = (id) => document.getElementById(id);
-const ui = { mode: $('mode'), language: $('language'), score: $('score'), round: $('round'), timer: $('timer'), stage: $('stage') };
+const ui = { mode: $('mode'), level: $('level'), language: $('language'), score: $('score'), round: $('round'), timer: $('timer'), stage: $('stage') };
 
 const t = translator(pickUiLanguage(navigator.languages ?? [navigator.language]));
 const saved = loadSaved();
@@ -24,12 +24,19 @@ translateDom(document, t);
 const MODE_LABELS = { both: 'modeBoth', numbers: 'modeNumbers', letters: 'modeLetters' };
 for (const mode of Object.keys(MODES)) ui.mode.add(new Option(t(MODE_LABELS[mode]), mode));
 for (const { code, name } of WORD_LANGUAGES) ui.language.add(new Option(name, code));
+const LEVEL_LABELS = { normal: 'levelNormal', kids: 'levelKids' };
+for (const level of Object.keys(LEVELS)) ui.level.add(new Option(t(LEVEL_LABELS[level]), level));
 ui.mode.value = saved.mode;
+ui.level.value = saved.level;
 ui.language.value = saved.language;
 
 ui.mode.addEventListener('change', () => {
   save();
   startRound(saved.index);
+});
+ui.level.addEventListener('change', () => {
+  save();
+  if (round.kind === 'numbers') startRound(round.index);
 });
 ui.language.addEventListener('change', () => {
   save();
@@ -55,7 +62,7 @@ function startRound(index) {
   save();
   showRoundTitle();
   if (kind === 'numbers') {
-    Object.assign(round, drawNumbers());
+    Object.assign(round, drawNumbers(Math.random, LEVELS[ui.level.value]));
     round.calc = new Calculation(round.plates);
     startThinking();
   } else {
@@ -433,11 +440,12 @@ function onKey(e) {
 
 function loadSaved() {
   const uiLanguage = pickUiLanguage(navigator.languages ?? [navigator.language]);
-  const defaults = { mode: 'both', language: uiLanguage, letterCount: 9, index: 0, score: { you: 0, computer: 0 }, round: null };
+  const defaults = { mode: 'both', level: 'normal', language: uiLanguage, letterCount: 9, index: 0, score: { you: 0, computer: 0 }, round: null };
   try {
     const s = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}');
     return {
       mode: MODES[s.mode] ? s.mode : defaults.mode,
+      level: LEVELS[s.level] ? s.level : defaults.level,
       language: WORD_LANGUAGES.some((l) => l.code === s.language) ? s.language : defaults.language,
       letterCount: LETTER_COUNTS.includes(s.letterCount) ? s.letterCount : defaults.letterCount,
       index: Number.isInteger(s.index) && s.index >= 0 ? s.index : defaults.index,
@@ -453,7 +461,7 @@ function save() {
   try {
     localStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify({ mode: ui.mode.value, language: ui.language.value, letterCount: saved.letterCount, index: saved.index, score, round: round && { ...round, pack: undefined } }),
+      JSON.stringify({ mode: ui.mode.value, level: ui.level.value, language: ui.language.value, letterCount: saved.letterCount, index: saved.index, score, round: round && { ...round, pack: undefined } }),
     );
   } catch {
     // Private mode: nothing persists.

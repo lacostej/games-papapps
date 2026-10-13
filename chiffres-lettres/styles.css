@@ -73,7 +73,6 @@ button:disabled { opacity: 0.45; cursor: default; }
 .toolbar select { padding: 0.4em 0.7em; font-size: 14px; min-width: 0; }
 
 .score {
-  margin-left: auto;
   flex: none;
   display: flex;
   align-items: baseline;
@@ -101,7 +100,8 @@ main {
 }
 
 .round-head { width: 100%; max-width: 480px; }
-.round { margin: 0; text-align: center; color: var(--muted); font-size: 14px; }
+.round-line { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.round { margin: 0; color: var(--muted); font-size: 14px; }
 
 .timer { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
 .timer[hidden] { display: none; }
