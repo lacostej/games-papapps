@@ -23,7 +23,7 @@ A connection over the internet would be one more file next to `lan.js`, for exam
 2. The player scans it with the phone's camera app. The page opens and shows a reply QR code.
 3. The host scans the reply with *Scan a reply*, or pastes it. The connection opens and the player is in.
 
-Each invite works once; the host's screen then shows a new one. *Invite* stays available during the game to add or bring back players.
+Each invite works once; the host's screen then shows a new one. *Invite* stays available during the game to add players. When a player drops out mid-game, the host's invite opens by itself, naming who left, and closes once everyone is back.
 
 ## Trying it
 

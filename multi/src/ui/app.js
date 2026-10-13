@@ -65,8 +65,19 @@ async function startHosting() {
     app.netStatus = text;
     render();
   };
+  // During a game the invite opens when someone drops out and closes when everyone is back.
+  let offline = 0;
+  let online = 0;
   app.host.onchange = () => {
     if (app.status === t('connecting')) app.status = '';
+    const players = app.host.view().players;
+    const now = { offline: players.filter((p) => !p.connected).length, online: players.filter((p) => p.connected).length };
+    if (now.offline > offline) {
+      app.inviteOpen = true;
+      app.status = '';
+    }
+    else if (now.online > online && !now.offline) app.inviteOpen = false;
+    ({ offline, online } = now);
     render();
   };
   if (app.settings.hostPlays) hostJoins();
@@ -223,10 +234,11 @@ function hostScreen() {
 
 function invitePanel() {
   const url = app.invite && `${inviteBase()}#join=${app.invite}`;
+  const gone = app.host.phase === 'lobby' ? [] : app.host.view().players.filter((p) => !p.connected).map((p) => p.name);
   return el(
     'section',
     { className: 'invite' },
-    el('p', { className: 'hint' }, t('inviteHint')),
+    el('p', { className: 'hint' }, gone.length ? t('rejoinHint', { names: gone.join(', ') }) : t('inviteHint')),
     url ? qrBox(url) : el('div', { className: 'qr' }, '…'),
     url ? el('details', { className: 'paste' }, el('summary', {}, t('asText')), codeField(url)) : '',
     app.stopScan ? video : '',
