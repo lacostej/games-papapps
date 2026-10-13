@@ -79,3 +79,17 @@ All rows except the first draw 5 cards.
 - **The 10 to 200 range** includes targets a child gets in one operation (6.8% with 1 to 10 once). Starting at 50 cuts that to 1.4% for one point less of exact draws.
 - **With 5 cards and targets up to 100**, 97% to 99.9% of draws are exact, easier than the current game.
 - **With 4 cards**, targets must stay at 30 or below to reach 90% exact. Up to 100, at most 69% of draws are exact.
+
+## Adding 12, 15, 20 or 25 to the kids' cards
+
+With 5 cards, one extra card on top of 1 to 10 brings the kids' draw level with the current game: 93.8% to 94.6% exact on targets 10 to 200. Two or more extras push it to about 96%. `node tools/numbers-extras.mjs` gives every subset (2,000 draws each, about ±1.1 points, so extras with the same count are not distinguishable).
+
+| Extra cards, 5 drawn | Targets 10 to 200: exact | Exact in ≤ 2 ops | Targets 50 to 200: exact | Exact in ≤ 2 ops |
+| --- | --- | --- | --- | --- |
+| none | 92.5% | 31.1% | 91.4% | 18.6% |
+| one of them | 93.8% to 94.6% | 34.3% to 36.5% | 92.2% to 93.8% | 20.6% to 21.9% |
+| two of them | 95.4% to 96.5% | 35.6% to 37.0% | 94.1% to 95.0% | 24.4% to 25.9% |
+| three of them | 95.7% to 96.5% | 37.6% to 38.5% | 94.9% to 95.5% | 26.3% to 27.9% |
+| all four | 96.2% | 37.9% | 95.4% | 25.8% |
+
+With one extra in the pool, 43.9% of draws deal it; with all four, 87.0% deal at least one. With 4 cards, extras do not help: exact stays between 65% and 69% for targets up to 100, and drops slightly for targets up to 50.
