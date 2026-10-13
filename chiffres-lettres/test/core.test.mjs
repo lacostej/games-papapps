@@ -48,6 +48,18 @@ test('drawNumbers takes six plates from the pool and a target of 100-999', () =>
   }
 });
 
+test('drawNumbers takes its pool, card count and target range as options', () => {
+  const random = seeded(5);
+  const targets = new Set();
+  for (let k = 0; k < 500; k++) {
+    const { plates, target } = drawNumbers(random, { pool: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], count: 5, min: 10, max: 12 });
+    assert.equal(new Set(plates).size, 5);
+    assert.ok(plates.every((p) => p >= 1 && p <= 10));
+    targets.add(target);
+  }
+  assert.deepEqual([...targets].sort((a, b) => a - b), [10, 11, 12]);
+});
+
 // Replays a solution with the plates it may use, so an illegal or wrong step fails.
 function replay(plates, steps) {
   const left = [...plates];

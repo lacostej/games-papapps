@@ -3,11 +3,11 @@
 export const PLATES = [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 25, 50, 75, 100];
 export const OPS = ['+', '-', '×', '÷'];
 
-export function drawNumbers(random = Math.random) {
-  const pool = [...PLATES];
+export function drawNumbers(random = Math.random, { pool: from = PLATES, count = 6, min = 100, max = 999 } = {}) {
+  const pool = [...from];
   const plates = [];
-  for (let i = 0; i < 6; i++) plates.push(pool.splice(Math.floor(random() * pool.length), 1)[0]);
-  return { plates, target: 100 + Math.floor(random() * 900) };
+  for (let i = 0; i < count; i++) plates.push(pool.splice(Math.floor(random() * pool.length), 1)[0]);
+  return { plates, target: min + Math.floor(random() * (max - min + 1)) };
 }
 
 // The result of a op b, or null when the rules forbid it (negative, zero or fractional).
