@@ -1,8 +1,7 @@
 // Every exact solution of numbers-round draws, grouped into methods (see docs/numbers-methods.md).
-// Usage: node tools/numbers-methods.mjs <normal|kids> <seed> <draws>
+// Usage: node tools/numbers-methods.mjs <normal|kids> <seed> <draws>   (Markdown on stdout)
 import { drawNumbers, LEVELS } from '../src/core/numbers.js';
 
-const CAP = 12; // canonical forms kept per value per subset, fewest operations first
 const leaf = (v) => ({ kind: 'n', v, key: String(v), ops: 0 });
 function group(kind, plus, minus) {
   const sort = (xs) => xs.slice().sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
@@ -51,6 +50,21 @@ export function family(e, top = true) {
   return den === 1 ? `${head} × ${num}` : num === 1 ? `${head} ÷ ${den}` : `${head} × ${num} ÷ ${den}`;
 }
 
+// The last step as values: the largest member of the final sum or product against all the rest.
+export function lastStep(e) {
+  if (e.kind === 'n') return String(e.v);
+  const members = [...e.plus.map((x) => [x.v, 1]), ...e.minus.map((x) => [x.v, -1])];
+  const [main] = members.filter(([, s]) => s > 0).sort((a, b) => b[0] - a[0]);
+  const rest = members.filter((t) => t !== main);
+  if (e.kind === '+') {
+    const r = rest.reduce((a, [v, s]) => a + s * v, 0);
+    return r >= 0 ? `${main[0]} + ${r}` : `${main[0]} − ${-r}`;
+  }
+  const num = rest.filter(([, s]) => s > 0).reduce((a, [v]) => a * v, 1);
+  const den = rest.filter(([, s]) => s < 0).reduce((a, [v]) => a * v, 1);
+  return den === 1 ? `${main[0]} × ${num}` : num === 1 ? `${main[0]} ÷ ${den}` : `${main[0]} × ${num} ÷ ${den}`;
+}
+
 export function solutions(plates, target) {
   const n = plates.length;
   const maps = new Array(1 << n);
@@ -59,8 +73,6 @@ export function solutions(plates, target) {
     if (!list) map.set(v, (list = []));
     if (list.some((x) => x.key === e.key)) return;
     list.push(e);
-    list.sort((x, y) => x.ops - y.ops);
-    if (list.length > CAP) list.pop();
   };
   const found = new Map();
   for (let mask = 1; mask < 1 << n; mask++) {
@@ -80,7 +92,7 @@ export function solutions(plates, target) {
     maps[mask] = map;
     for (const e of map.get(target) ?? []) found.set(e.key, e);
   }
-  return [...found.values()].sort((x, y) => x.ops - y.ops).map((e) => ({ ops: e.ops, text: show(e), key: e.key, family: family(e) }));
+  return [...found.values()].sort((x, y) => x.ops - y.ops).map((e) => ({ ops: e.ops, text: show(e), key: e.key, family: family(e), last: lastStep(e) }));
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
@@ -91,13 +103,17 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   while (shown < Number(count)) {
     const { plates, target } = drawNumbers(random, LEVELS[level]);
     const sols = solutions(plates, target);
-    const few = sols.filter((s) => s.ops <= sols[0]?.ops + 1);
-    if (few.length < 4 || few.length > 9) continue;
+    const methods = new Map();
+    for (const x of sols) methods.set(x.family, [...(methods.get(x.family) ?? []), x]);
+    if (methods.size < 3 || methods.size > 12) continue;
     shown++;
-    const families = new Map();
-    for (const s of sols) families.set(s.family, [...(families.get(s.family) ?? []), s]);
-    console.log(`\n${plates.join(' ')} → ${target}: ${sols.length} solutions, ${families.size} families`);
-    for (const [f, list] of [...families].sort((a, b) => a[1][0].ops - b[1][0].ops))
-      console.log(`  ${f.padEnd(26)} ${list.length} × e.g. ${list.slice(0, 3).map((s) => s.text).join('  |  ')}`);
+    const lasts = new Map();
+    for (const [f, list] of methods) lasts.set(list[0].last, [...(lasts.get(list[0].last) ?? []), [f, list]]);
+    console.log(`\n### ${level === 'kids' ? 'Kids' : 'Normal'} ${shown}: ${plates.join(' ')} → ${target}\n`);
+    console.log(`${sols.length} solutions, ${methods.size} methods, ${lasts.size} last steps.\n`);
+    console.log('| Last step | Method | Solutions | Example |\n| --- | --- | --- | --- |');
+    const order = [...lasts].sort((a, b) => b[1].length - a[1].length || Math.min(...a[1].map(([, l]) => l[0].ops)) - Math.min(...b[1].map(([, l]) => l[0].ops)));
+    for (const [last, group] of order)
+      group.forEach(([f, list], i) => console.log(`| ${i ? '' : (group.length > 1 ? `**${last}**` : last)} | ${f} | ${list.length} | ${list[0].text} |`));
   }
 }

@@ -37,4 +37,4 @@ Draw 7 9 1 5 50 6, target 187: 16 solutions in 10 methods. The three ways to rea
 | ((50 − 7) × 4) + 15 | 1 | (5 − 1) × (50 − 7) + 6 + 9 |
 | ((50 + 12) × 3) + 1 | 1 | (5 + 50 + 7) × (9 − 6) + 1 |
 
-The search keeps at most 12 ways to make each intermediate value from each set of cards, so a rare solution can be missing from these counts.
+The search lists every exact solution; more examples are in [numbers-methods-examples.md](numbers-methods-examples.md).
