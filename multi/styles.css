@@ -49,3 +49,4 @@ textarea.code { width: 100%; font: 12px/1.3 ui-monospace, monospace; resize: non
 .roster li.offline { text-decoration: line-through; opacity: 0.6; }
 .roster li.answered { color: var(--good); font-weight: 600; }
 .roster li.answered::after { content: ' ✓'; }
+.diag { margin: 0; font: 11px/1.4 ui-monospace, monospace; color: var(--muted); text-align: center; overflow-wrap: anywhere; -webkit-user-select: text; user-select: text; }

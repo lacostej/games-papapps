@@ -4,7 +4,7 @@
 import { Host, Player } from '../core/session.js';
 import { memoryPair } from '../core/memory.js';
 import { GAMES } from '../games/index.js';
-import { LanListener, reply } from '../net/lan.js';
+import { LanListener, reply, revealAddress } from '../net/lan.js';
 import { Calculation, OPS } from '../../../chiffres-lettres/src/core/numbers.js';
 import { canScan, qrSvg, scan } from './qr.js';
 import { translator } from './i18n.js';
@@ -31,6 +31,7 @@ const app = {
   inviteOpen: false,
   status: '',
   stopScan: null,
+  netStatus: '',
   replyCode: null,
   error: '',
   settings: { rounds: 5, level: 'normal', think: 45, answer: 30, hostPlays: true },
@@ -55,10 +56,15 @@ setInterval(tick, 250);
 
 // Starting ----------------------------------------------------------------------------
 
-function startHosting() {
+async function startHosting() {
+  if (canScan()) await revealAddress();
   app.host = new Host({ games: GAMES });
   app.listener = new LanListener(iceConfig());
   app.host.listen(app.listener);
+  app.listener.onstatus = (text) => {
+    app.netStatus = text;
+    render();
+  };
   app.host.onchange = () => {
     if (app.status === t('connecting')) app.status = '';
     render();
@@ -83,7 +89,10 @@ async function startJoining() {
   render();
   let connection;
   try {
-    ({ code: app.replyCode, connection } = await reply(app.invite, iceConfig()));
+    ({ code: app.replyCode, connection } = await reply(app.invite, iceConfig(), (text) => {
+      app.netStatus = text;
+      if (app.screen === 'reply') render();
+    }));
   } catch {
     app.error = t('badCode');
     return render();
@@ -190,6 +199,7 @@ function replyScreen() {
     el('p', { className: 'hint' }, t('showHost')),
     qrBox(app.replyCode),
     codeField(app.replyCode),
+    el('p', { className: 'diag' }, app.netStatus),
   ];
 }
 
@@ -212,7 +222,7 @@ function hostScreen() {
 }
 
 function invitePanel() {
-  const url = app.invite && `${location.origin}${location.pathname}${location.search}#join=${app.invite}`;
+  const url = app.invite && `${inviteBase()}#join=${app.invite}`;
   return el(
     'section',
     { className: 'invite' },
@@ -223,6 +233,7 @@ function invitePanel() {
     canScan() ? button(app.stopScan ? t('stopScan') : t('scanReply'), toggleScan, app.stopScan ? '' : 'primary') : '',
     pasteForm(t('add'), acceptReply, t('pasteReply')),
     app.status ? el('p', { className: 'hint alert' }, app.status) : '',
+    app.netStatus ? el('p', { className: 'diag' }, app.netStatus) : '',
   );
 }
 
@@ -472,6 +483,16 @@ function el(tag, props, ...children) {
 function codeFrom(text) {
   const hash = text.includes('#') ? text.slice(text.indexOf('#') + 1) : '';
   return new URLSearchParams(hash).get('join') ?? text.trim();
+}
+
+// The page players open. ?base=<url> replaces it when hosting from localhost, which phones can't
+// reach but which is the only plain-http address where the camera works.
+function inviteBase() {
+  const params = new URLSearchParams(location.search);
+  const base = params.get('base');
+  params.delete('base');
+  const rest = params.size ? `?${params}` : '';
+  return base ? `${base}${rest}` : `${location.origin}${location.pathname}${rest}`;
 }
 
 // ?ice=stun:host:port adds an ICE server; by default only the local network is tried.

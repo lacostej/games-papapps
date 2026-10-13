@@ -27,14 +27,15 @@ Each invite works once; the host's screen then shows a new one. *Invite* stays a
 
 ## Trying it
 
-- `npm start` and open `http://<computer IP>:8080/multi/` on each device. Browsers allow the camera only on https or localhost, so on plain http use *Show as text* and the paste fields.
-- The published site is https, so scanning works there.
+- Locally: `npm start` prints a `localhost` URL for hosting from this computer. Browsers allow the camera only on https or localhost, and `?base=` makes the invite link point at the computer's network address. Phones join by scanning it; they don't need the page's camera.
+- The published site is https, so any device can host there.
 - `?ice=stun:host:port` adds an ICE server. By default only the local network is tried.
 
 ## Checked so far
 
 - `npm test`: sessions over in-memory connections, covering a full series, the clock, early end, a dropped player rejoining, removal, and replaying numbers moves.
-- Headless Chrome, two isolated browser profiles on one machine, over real WebRTC: connect, play a round, see results, drop out and rejoin into the next round. This passes only with `--disable-features=WebRtcHideLocalIpsWithMdns`. With Chrome's default, the codes carry `.local` (mDNS) names instead of addresses, and the two profiles never connected.
+- Headless Chrome, two isolated browser profiles on one machine, over real WebRTC: connect, play a round, see results, drop out and rejoin into the next round. With camera permission the host's code carries its real address and the player's a `.local` name, and they connect. Without it, both carry `.local` names, and one of three runs failed to connect.
+- Both screens show a status line during joining, e.g. `connected · here: 192.168.1.39 · there: <name>.local`: the connection state and each side's addresses.
 
 ## Open questions, in order
 

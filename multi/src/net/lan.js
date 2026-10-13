@@ -15,6 +15,8 @@ export class LanListener {
   constructor(config = { iceServers: [] }) {
     this.config = config;
     this.onconnection = null;
+    // Called with a one-line status of the last accepted reply's connection, for diagnosis.
+    this.onstatus = null;
   }
 
   // A new invite code. An unanswered previous invite stops working.
@@ -36,6 +38,7 @@ export class LanListener {
     if (!this.#invite || this.#invite.id !== i) throw new Error('stale');
     const { pc } = this.#invite;
     this.#invite = null;
+    watch(pc, (text) => this.onstatus?.(text));
     await pc.setRemoteDescription({ type: 'answer', sdp: s });
   }
 
@@ -46,9 +49,11 @@ export class LanListener {
 }
 
 // The player's side: the reply code to show the host, and the connection once it opens.
-export async function reply(inviteCode, config = { iceServers: [] }) {
+// onstatus gets a one-line status of the connection, for diagnosis.
+export async function reply(inviteCode, config = { iceServers: [] }, onstatus = () => {}) {
   const { i, s } = await decode(inviteCode);
   const pc = new RTCPeerConnection(config);
+  watch(pc, onstatus);
   const connection = new Promise((resolve, reject) => {
     pc.ondatachannel = ({ channel }) => {
       if (channel.readyState === 'open') resolve(wrap(pc, channel));
@@ -87,6 +92,27 @@ function wrap(pc, channel) {
     if (pc.connectionState === 'failed' || pc.connectionState === 'closed') end();
   };
   return conn;
+}
+
+// e.g. "checking · here: 192.168.1.39 · there: name.local": the ICE state and the addresses each
+// side offered. Names ending in .local are hidden addresses that the other device must resolve.
+function watch(pc, onstatus) {
+  const addresses = (desc) => [...new Set((desc?.sdp ?? '').split('\r\n').filter((l) => l.startsWith('a=candidate')).map((l) => l.split(' ')[4]))].join(', ') || '–';
+  const report = () => onstatus(`${pc.iceConnectionState} · here: ${addresses(pc.localDescription)} · there: ${addresses(pc.remoteDescription)}`);
+  pc.addEventListener('iceconnectionstatechange', report);
+  pc.addEventListener('signalingstatechange', report);
+}
+
+// Browsers hide this device's address behind a .local name until the page may use the camera or
+// microphone. Phones often can't resolve those names, so the host asks for the camera first.
+export async function revealAddress() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+    for (const track of stream.getTracks()) track.stop();
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function gathered(pc) {

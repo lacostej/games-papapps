@@ -41,7 +41,10 @@ server.listen(port, '0.0.0.0', () => {
   console.log(`Papapps on http://localhost:${port}/`);
   for (const addrs of Object.values(networkInterfaces())) {
     for (const a of addrs ?? []) {
-      if (a.family === 'IPv4' && !a.internal) console.log(`  on your phone: http://${a.address}:${port}/`);
+      if (a.family === 'IPv4' && !a.internal) {
+        console.log(`  on your phone: http://${a.address}:${port}/`);
+        console.log(`  host multi/ from this computer: http://localhost:${port}/multi/?base=http://${a.address}:${port}/multi/`);
+      }
     }
   }
 });
