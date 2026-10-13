@@ -111,7 +111,11 @@ export function solutions(plates, target) {
 // announced value. The latest number with that value is the one announced.
 export function fromMoves(plates, moves, value) {
   const trees = plates.map(leaf);
-  for (const [a, op, b] of moves) trees.push(combine(trees[a], op, trees[b]));
+  for (const [a, op, b] of moves) {
+    // Saves from before undo reused ids can name a number that was never made.
+    if (!trees[a] || !trees[b]) return undefined;
+    trees.push(combine(trees[a], op, trees[b]));
+  }
   const used = new Set(moves.flatMap(([a, , b]) => [a, b]));
   return [...trees.keys()].reverse().filter((id) => !used.has(id) && trees[id].v === value).map((id) => trees[id])[0];
 }

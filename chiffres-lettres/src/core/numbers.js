@@ -98,6 +98,8 @@ export class Calculation {
     if (!step) return;
     this.slots[step.aSlot] = step.a;
     this.slots[step.bSlot] = step.b;
+    // Its id is reused, so ids stay one per saved move and the moves replay.
+    this.nextId = step.made.id;
   }
 
   // Saved as the moves by id; replaying them gives the same ids again.

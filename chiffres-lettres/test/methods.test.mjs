@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { combine, describe, fromMoves, fromSteps, solutions } from '../src/core/methods.js';
+import { Calculation } from '../src/core/numbers.js';
 
 const card = (v) => fromMoves([v], [], v);
 const PLATES = [7, 9, 1, 5, 50, 6];
@@ -41,4 +42,19 @@ test('an announced number is the one left over, or a card', () => {
   assert.equal(fromMoves(PLATES, [[4, '+', 5]], 56).v, 56);
   assert.equal(fromMoves(PLATES, [[4, '+', 5], [6, '-', 2]], 56), undefined);
   assert.equal(fromMoves(PLATES, [], 50).key, '50');
+});
+
+test('moves made after an undo replay to the same numbers', () => {
+  const calc = new Calculation(PLATES);
+  calc.combine(4, '+', 5);
+  calc.undo();
+  const made = calc.combine(4, '×', 3);
+  calc.combine(made.id, '-', 0);
+  const { moves } = calc.toJSON();
+  assert.deepEqual(Calculation.from({ plates: PLATES, moves }).numbers, calc.numbers);
+  assert.equal(fromMoves(PLATES, moves, 243).v, 243);
+});
+
+test('a save naming a number that was never made gives no answer instead of failing', () => {
+  assert.equal(fromMoves(PLATES, [[4, '×', 3], [7, '-', 0]], 243), undefined);
 });
