@@ -36,6 +36,7 @@ Each invite works once; the host's screen then shows a new one. *Invite* stays a
 - `npm test`: sessions over in-memory connections, covering a full series, the clock, early end, a dropped player rejoining, removal, and replaying numbers moves.
 - Headless Chrome, two isolated browser profiles on one machine, over real WebRTC: connect, play a round, see results, drop out and rejoin into the next round. With camera permission the host's code carries its real address and the player's a `.local` name, and they connect. Without it, both carry `.local` names, and one of three runs failed to connect.
 - Firefox 157, headless with a fake camera: an invite offered only a `.local` name with no camera, with the camera running, and after it stopped. So a Firefox host can't reveal its address. On a real network, a Firefox host and a phone failed with `.local` names on both sides.
+- Real devices on the home Wi-Fi: Chrome on a Mac (localhost host, camera allowed) and Chrome on a phone connected, with real addresses on both sides. With Firefox as the phone's browser and the same Chrome host, it stayed on `checking`; the final state is unknown.
 - Both screens show a status line during joining, e.g. `connected · here: 192.168.1.39 · there: <name>.local`: the connection state and each side's addresses.
 
 ## Open questions, in order
