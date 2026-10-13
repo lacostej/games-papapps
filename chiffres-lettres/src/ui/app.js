@@ -335,6 +335,7 @@ function renderNumbers() {
     const { calc } = round;
     const pick = round.pick ?? {};
     const tapNumber = (n) => {
+      round.touched = true;
       if (pick.a === undefined || pick.op === undefined) round.pick = { a: n.id };
       else if (n.id === pick.a) round.pick = {};
       else {
@@ -380,7 +381,8 @@ function renderNumbers() {
           round.error = false;
           render();
         }, '', undefined, !calc.steps.length),
-        button(t('announce', { value: t.number(value) }), submitNumbers, 'primary'),
+        // Disabled until a card is tapped, so a tap meant for Answer as time runs out can't announce.
+        button(t('announce', { value: t.number(value) }), submitNumbers, 'primary', undefined, !round.touched),
       ),
     ];
   }
