@@ -252,3 +252,44 @@ main {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* Solutions explorer (explore.html). The page scrolls; you and the computer each have a colour. */
+body.explore { height: auto; min-height: 100dvh; --you: var(--accent); --cpu: #7a5bc7; }
+@media (prefers-color-scheme: dark) { body.explore { --cpu: #a58ae6; } }
+.explore main { gap: 14px; max-width: 520px; width: 100%; margin: 0 auto; }
+.back { color: var(--ink); font-size: 15px; text-decoration: none; }
+.back::before { content: '‹ '; }
+
+.cards { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.cards .plate { height: 40px; min-width: 40px; padding: 0 6px; font-size: 18px; border-radius: 10px; }
+.cards .plate.unused { opacity: 0.3; }
+
+.answers { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+.answer-pick { display: flex; gap: 8px; align-items: baseline; text-align: left; border-radius: 12px; border-left: 4px solid; font-variant-numeric: tabular-nums; }
+.answer-pick.you { border-color: var(--you); }
+.answer-pick.computer { border-color: var(--cpu); }
+.answer-pick .who { font-size: 12px; color: var(--muted); flex: none; }
+
+.level { width: 100%; }
+.level h2 { margin: 0 0 6px; font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 0.35em 0.8em; font-size: 15px; font-variant-numeric: tabular-nums; }
+.chip small { color: var(--muted); font-size: 12px; }
+.chip.selected { outline: 2px solid var(--ink); outline-offset: -2px; }
+.dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.dot.you { background: var(--you); }
+.dot.computer { background: var(--cpu); }
+
+.tree-box { width: 100%; display: flex; justify-content: center; padding: 8px 0; }
+.tree { width: 100%; height: auto; font-variant-numeric: tabular-nums; }
+.tree .branch { stroke: var(--line); stroke-width: 2; }
+.tree .op-dot { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
+.tree .op-sign { fill: var(--ink); font-size: 13px; font-weight: 700; }
+.tree .node-card { fill: var(--plate); }
+.tree .node-card-text { fill: #fff; font-size: 15px; font-weight: 800; }
+.tree .node-value { fill: var(--surface); stroke: var(--ink); stroke-width: 1.5; }
+.tree .node-root { fill: var(--ink); }
+.tree.you .node-root { fill: var(--you); }
+.tree.computer .node-root { fill: var(--cpu); }
+.tree .node-value-text { fill: var(--ink); font-size: 15px; font-weight: 700; }
+.tree .node-root + .node-value-text { fill: var(--bg); }

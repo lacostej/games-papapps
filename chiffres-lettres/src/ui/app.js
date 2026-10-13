@@ -181,6 +181,13 @@ function submitNumbers() {
   const value = round.calc.closest(round.target);
   const best = solve(round.plates, round.target);
   round.result = { value, steps: round.calc.steps, best, you: numbersScore(value, round.target), computer: numbersScore(best.value, round.target) };
+  // Read by the solutions explorer (explore.html).
+  saved.lastNumbers = {
+    plates: round.plates,
+    target: round.target,
+    you: { value, moves: round.calc.toJSON().moves },
+    computer: { value: best.value, steps: best.steps },
+  };
   finish(round.result.you, round.result.computer);
 }
 
@@ -384,7 +391,12 @@ function renderNumbers() {
     target,
     resultRow(t('you'), `${value}`, you, distance(value), stepsList(steps.map(({ a, op, b, made }) => ({ a: a.value, op, b: b.value, result: made.value })))),
     resultRow(t('computer'), `${best.value}`, computer, distance(best.value), stepsList(best.steps)),
-    el('div', { className: 'choices' }, button(t('next'), () => startRound(round.index + 1), 'big primary')),
+    el(
+      'div',
+      { className: 'choices' },
+      button(t('explore'), () => location.assign('explore.html')),
+      button(t('next'), () => startRound(round.index + 1), 'big primary'),
+    ),
   ];
 }
 
@@ -440,7 +452,7 @@ function onKey(e) {
 
 function loadSaved() {
   const uiLanguage = pickUiLanguage(navigator.languages ?? [navigator.language]);
-  const defaults = { mode: 'both', level: 'normal', language: uiLanguage, letterCount: 9, index: 0, score: { you: 0, computer: 0 }, round: null };
+  const defaults = { mode: 'both', level: 'normal', language: uiLanguage, letterCount: 9, index: 0, score: { you: 0, computer: 0 }, round: null, lastNumbers: null };
   try {
     const s = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}');
     return {
@@ -451,6 +463,7 @@ function loadSaved() {
       index: Number.isInteger(s.index) && s.index >= 0 ? s.index : defaults.index,
       score: { ...defaults.score, ...s.score },
       round: s.round && typeof s.round === 'object' ? s.round : null,
+      lastNumbers: s.lastNumbers && typeof s.lastNumbers === 'object' ? s.lastNumbers : null,
     };
   } catch {
     return defaults;
@@ -461,7 +474,7 @@ function save() {
   try {
     localStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify({ mode: ui.mode.value, level: ui.level.value, language: ui.language.value, letterCount: saved.letterCount, index: saved.index, score, round: round && { ...round, pack: undefined } }),
+      JSON.stringify({ mode: ui.mode.value, level: ui.level.value, language: ui.language.value, letterCount: saved.letterCount, index: saved.index, score, round: round && { ...round, pack: undefined }, lastNumbers: saved.lastNumbers }),
     );
   } catch {
     // Private mode: nothing persists.
