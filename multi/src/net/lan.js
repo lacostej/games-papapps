@@ -94,11 +94,21 @@ function wrap(pc, channel) {
   return conn;
 }
 
-// e.g. "checking · here: 192.168.1.39 · there: name.local": the ICE state and the addresses each
-// side offered. Names ending in .local are hidden addresses that the other device must resolve.
+// e.g. "checking 0s → connected 2s · here: 192.168.1.39 · there: name.local": the ICE states with
+// seconds since the first, and the addresses each side offered. Names ending in .local are hidden
+// addresses that the other device must resolve.
 function watch(pc, onstatus) {
   const addresses = (desc) => [...new Set((desc?.sdp ?? '').split('\r\n').filter((l) => l.startsWith('a=candidate')).map((l) => l.split(' ')[4]))].join(', ') || '–';
-  const report = () => onstatus(`${pc.iceConnectionState} · here: ${addresses(pc.localDescription)} · there: ${addresses(pc.remoteDescription)}`);
+  const states = [];
+  let start;
+  const report = () => {
+    if (pc.iceConnectionState !== states.at(-1)?.state) {
+      start ??= Date.now();
+      states.push({ state: pc.iceConnectionState, at: Math.round((Date.now() - start) / 1000) });
+    }
+    const path = states.map((s) => `${s.state} ${s.at}s`).join(' → ');
+    onstatus(`${path} · here: ${addresses(pc.localDescription)} · there: ${addresses(pc.remoteDescription)}`);
+  };
   pc.addEventListener('iceconnectionstatechange', report);
   pc.addEventListener('signalingstatechange', report);
 }
