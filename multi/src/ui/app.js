@@ -138,7 +138,8 @@ async function acceptReply(text) {
   render();
 }
 
-async function toggleScan() {
+// Scans with the page's camera until a code is read; onCode gets its text.
+async function toggleScan(onCode) {
   if (app.stopScan) {
     app.stopScan();
     app.stopScan = null;
@@ -148,7 +149,7 @@ async function toggleScan() {
     app.stopScan = await scan(video, (text) => {
       app.stopScan?.();
       app.stopScan = null;
-      acceptReply(text);
+      onCode(text);
     });
     app.status = '';
   } catch {
@@ -179,6 +180,7 @@ function home() {
     nameField(),
     button(t('host'), startHosting, 'big primary'),
     el('p', { className: 'hint' }, t('joinHint')),
+    ...scanHost(),
     el(
       'details',
       { className: 'paste' },
@@ -188,6 +190,20 @@ function home() {
         startJoining();
       }),
     ),
+  ];
+}
+
+// Joining from this page instead of the camera app, where the page may use the camera.
+function scanHost() {
+  if (!canScan()) return [];
+  const join = (text) => {
+    app.invite = codeFrom(text);
+    startJoining();
+  };
+  return [
+    app.stopScan ? video : '',
+    button(app.stopScan ? t('stopScan') : t('scanHost'), () => toggleScan(join), app.stopScan ? '' : 'primary'),
+    app.status ? el('p', { className: 'hint alert' }, app.status) : '',
   ];
 }
 
@@ -242,7 +258,7 @@ function invitePanel() {
     url ? qrBox(url) : el('div', { className: 'qr' }, '…'),
     url ? el('details', { className: 'paste' }, el('summary', {}, t('asText')), codeField(url)) : '',
     app.stopScan ? video : '',
-    canScan() ? button(app.stopScan ? t('stopScan') : t('scanReply'), toggleScan, app.stopScan ? '' : 'primary') : '',
+    canScan() ? button(app.stopScan ? t('stopScan') : t('scanReply'), () => toggleScan(acceptReply), app.stopScan ? '' : 'primary') : '',
     pasteForm(t('add'), acceptReply, t('pasteReply')),
     app.status ? el('p', { className: 'hint alert' }, app.status) : '',
     app.netStatus ? el('p', { className: 'diag' }, app.netStatus) : '',
@@ -279,7 +295,7 @@ function settingsForm() {
 
 function playerScreen() {
   const { me } = app;
-  const lost = me && !me.connected ? el('p', { className: 'hint alert' }, t('lost')) : '';
+  const lost = me && !me.connected ? el('div', { className: 'code-box' }, el('p', { className: 'hint alert' }, t('lost')), ...scanHost()) : '';
   const state = me?.state;
   if (!state) return [lost || el('p', { className: 'hint' }, t('connecting'))];
   if (state.phase === 'lobby') return [lost, el('p', { className: 'hint' }, t('waitingHost')), playersList(state)];

@@ -26,7 +26,7 @@ input[type='text'], textarea.code {
 /* Dark modules on white whatever the theme: phone cameras read that best. */
 .qr { width: min(100%, 280px); aspect-ratio: 1; display: grid; place-items: center; background: #fff; color: #000; border-radius: 12px; }
 .qr svg { width: 100%; height: 100%; }
-.invite video { width: min(100%, 280px); border-radius: 12px; background: #000; }
+.multi video { width: min(100%, 280px); border-radius: 12px; background: #000; }
 
 .code-box { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%; max-width: 320px; }
 textarea.code { width: 100%; font: 12px/1.3 ui-monospace, monospace; resize: none; word-break: break-all; }
