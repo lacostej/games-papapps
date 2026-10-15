@@ -49,13 +49,13 @@ Browsers replace a device's local address with a random `.local` name in what We
 - Real devices on the home Wi-Fi:
   - Chrome host on a Mac (localhost, camera allowed) with a Chrome phone: connected, real addresses on both sides.
   - Same host with a Firefox phone: one attempt never opened (host `checking 0s → disconnected 15s`, phone stuck on `checking` with the host's real address), a later one connected.
-  - Firefox host on the Mac with a Firefox phone, camera turned off right after the one-time *Allow*: `.local` names on both sides, `failed` after 5 s. With *Remember for all cameras* ticked: the host showed its real address and they connected.
+  - Firefox host on the Mac with a Firefox phone, camera turned off right after the one-time *Allow*: `.local` names on both sides, `failed` after 5 s. With *Remember for all cameras* ticked: the host showed its real address and they connected. On the published site, with a one-time *Allow* and the camera kept on while each invite is made: connected.
 - Firefox 157 headless with a fake camera and `media.navigator.permission.disabled` kept the address hidden even while capturing, contradicting the source above; that setup probably doesn't count as capturing. Real devices are the reference.
 - Both screens show a status line during joining, e.g. `checking 0s → connected 2s · here: 192.168.1.39 · there: <name>.local`: the connection states with their timing, and each side's addresses.
 
 ## Open questions, in order
 
-1. Does a Firefox host with a one-time *Allow* now connect, with the camera kept on while each invite is made? Does Firefox ask again for each invite?
+1. Does Firefox ask for the camera again for each invite after a one-time *Allow*?
 2. iPhone ↔ Android, and routers that isolate devices from each other.
 3. Codes are about 600 characters, which makes dense QR codes. If phones struggle to scan them, keep only the parts of the offer WebRTC needs.
 4. Reloading the host's page ends the session.
