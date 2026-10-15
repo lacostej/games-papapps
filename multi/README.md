@@ -33,16 +33,29 @@ Each invite works once; the host's screen then shows a new one. *Invite* stays a
 - The published site is https, so any device can host there.
 - `?ice=stun:host:port` adds an ICE server. By default only the local network is tried.
 
+## Hidden addresses
+
+Browsers replace a device's local address with a random `.local` name in what WebRTC shares with a page, so that sites can't read it to track visitors. The other device must look that name up on the Wi-Fi (multicast DNS), and this is where LAN connections fail.
+
+- The exception: a page that may use the camera or microphone gets the real address. Chrome exempts sites "that have getUserMedia permissions, which are presumed to have a higher degree of user trust" ([announcement](https://groups.google.com/g/discuss-webrtc/c/6stQXi72BEU/m/2FwZd24UAQAJ)), and [RFC 8828](https://www.rfc-editor.org/rfc/rfc8828.html) suggests tying the consent to expose all addresses to that permission. It is a trust heuristic, not a security boundary: a site that may see the camera already sees more than a local address.
+- Firefox applies the same exception, but only while the page is capturing or holds a remembered permission (`IsActivelyCapturingOrHasAPermission` in `dom/media/MediaManager.cpp`, used by `GetPrefObfuscateHostAddresses` in `PeerConnectionImpl.cpp`). A one-time *Allow* stops counting once the camera is off, so the host keeps the camera running while each invite gathers its addresses (`LanListener.reveal`).
+- One side's real address is enough: the other side sends its checks there and is answered. With `.local` names on both sides, both lookups must work, and Firefox has open bugs there: it answers lookups for its own names only once the connection setup is complete ([1691189](https://bugzilla.mozilla.org/show_bug.cgi?id=1691189)), and LAN connections with Firefox on one side fail unless hiding is turned off ([1698141](https://bugzilla.mozilla.org/show_bug.cgi?id=1698141)). The pref `media.peerconnection.ice.obfuscate_host_addresses` turns hiding off on desktop; Firefox for Android has no `about:config`.
+- Beyond the LAN, a STUN server (`?ice=`) adds the router's public address, which browsers don't hide; two devices behind the same router then connect only if it passes that traffic back inside. A relay works always but needs a server.
+
 ## Checked so far
 
 - `npm test`: sessions over in-memory connections, covering a full series, the clock, early end, a dropped player rejoining, removal, and replaying numbers moves.
-- Headless Chrome, two isolated browser profiles on one machine, over real WebRTC: connect, play a round, see results, drop out and rejoin into the next round. With camera permission the host's code carries its real address and the player's a `.local` name, and they connect. Without it, both carry `.local` names, and one of three runs failed to connect.
-- Firefox 157, headless with a fake camera: an invite offered only a `.local` name with no camera, with the camera running, and after it stopped. So a Firefox host can't reveal its address. On a real network, a Firefox host and a phone failed with `.local` names on both sides.
-- Real devices on the home Wi-Fi: Chrome on a Mac (localhost host, camera allowed) and Chrome on a phone connected, with real addresses on both sides. With Firefox as the phone's browser and the same Chrome host, one attempt never opened: the host went `checking 0s → disconnected 15s`, and the phone stayed on `checking` although it had the host's real address. A later attempt connected. So a Firefox guest can work, but not reliably yet.
+- Headless Chrome, two isolated browser profiles on one machine, over real WebRTC: connect, play a round, see results, drop out and rejoin into the next round, including by scanning from the page with a fake camera. With camera permission the host's code carries its real address and the player's a `.local` name; 26 of 27 runs connected. Without it, both carry `.local` names, and one of three runs failed to connect.
+- Real devices on the home Wi-Fi:
+  - Chrome host on a Mac (localhost, camera allowed) with a Chrome phone: connected, real addresses on both sides.
+  - Same host with a Firefox phone: one attempt never opened (host `checking 0s → disconnected 15s`, phone stuck on `checking` with the host's real address), a later one connected.
+  - Firefox host on the Mac with a Firefox phone, camera turned off right after the one-time *Allow*: `.local` names on both sides, `failed` after 5 s. With *Remember for all cameras* ticked: the host showed its real address and they connected.
+- Firefox 157 headless with a fake camera and `media.navigator.permission.disabled` kept the address hidden even while capturing, contradicting the source above; that setup probably doesn't count as capturing. Real devices are the reference.
 - Both screens show a status line during joining, e.g. `checking 0s → connected 2s · here: 192.168.1.39 · there: <name>.local`: the connection states with their timing, and each side's addresses.
 
 ## Open questions, in order
 
-1. Do real phones on the home Wi-Fi connect? This depends on `.local` names resolving between devices (see above), and on the router not isolating devices from each other. It is the first thing to try, including iPhone ↔ Android.
-2. Codes are about 600 characters, which makes dense QR codes. If phones struggle to scan them, keep only the parts of the offer WebRTC needs.
-3. Reloading the host's page ends the session.
+1. Does a Firefox host with a one-time *Allow* now connect, with the camera kept on while each invite is made? Does Firefox ask again for each invite?
+2. iPhone ↔ Android, and routers that isolate devices from each other.
+3. Codes are about 600 characters, which makes dense QR codes. If phones struggle to scan them, keep only the parts of the offer WebRTC needs.
+4. Reloading the host's page ends the session.
