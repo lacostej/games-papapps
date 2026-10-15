@@ -57,9 +57,10 @@ setInterval(tick, 250);
 // Starting ----------------------------------------------------------------------------
 
 async function startHosting() {
-  if (canScan()) await revealAddress();
   app.host = new Host({ games: GAMES });
   app.listener = new LanListener(iceConfig());
+  // Asks once: after a refusal, invites go out with hidden addresses.
+  if (canScan()) app.listener.reveal = async () => (await revealAddress()) ?? void (app.listener.reveal = null);
   app.host.listen(app.listener);
   app.listener.onstatus = (text) => {
     app.netStatus = text;

@@ -17,6 +17,8 @@ export class LanListener {
     this.onconnection = null;
     // Called with a one-line status of the last accepted reply's connection, for diagnosis.
     this.onstatus = null;
+    // Called before each invite gathers its addresses; may return a function to call after.
+    this.reveal = null;
   }
 
   // A new invite code. An unanswered previous invite stops working.
@@ -27,8 +29,13 @@ export class LanListener {
     const channel = pc.createDataChannel('game');
     channel.onopen = () => this.onconnection?.(wrap(pc, channel));
     this.#invite = { id, pc };
-    await pc.setLocalDescription();
-    await gathered(pc);
+    const release = await this.reveal?.();
+    try {
+      await pc.setLocalDescription();
+      await gathered(pc);
+    } finally {
+      release?.();
+    }
     return encode({ i: id, s: pc.localDescription.sdp });
   }
 
@@ -113,15 +120,15 @@ function watch(pc, onstatus) {
   pc.addEventListener('signalingstatechange', report);
 }
 
-// Browsers hide this device's address behind a .local name until the page may use the camera or
-// microphone. Phones often can't resolve those names, so the host asks for the camera first.
+// Browsers hide this device's address behind a .local name unless the page may use the camera or
+// microphone, and phones often can't resolve those names. Firefox counts a one-time permission only
+// while the camera runs, so this starts it and returns the function that stops it, or null if refused.
 export async function revealAddress() {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-    for (const track of stream.getTracks()) track.stop();
-    return true;
+    return () => stream.getTracks().forEach((track) => track.stop());
   } catch {
-    return false;
+    return null;
   }
 }
 
