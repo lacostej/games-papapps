@@ -50,8 +50,8 @@ Browsers replace a device's local address with a random `.local` name in what We
 
   | Host (Mac) | Phone | Host's camera | Result |
   |---|---|---|---|
-  | Chrome, localhost | Chrome | one-time *Allow* | `connected`, real addresses on both sides |
-  | Chrome, localhost | Firefox | one-time *Allow* | first attempt `checking 0s → disconnected 15s` (phone stuck on `checking` with the host's real address); a later attempt connected |
+  | Chrome, localhost | Chrome | allowed | `connected`, real addresses on both sides |
+  | Chrome, localhost | Firefox | allowed | first attempt `checking 0s → disconnected 15s` (phone stuck on `checking` with the host's real address); a later attempt connected |
   | Firefox, localhost | Firefox | none | `failed` after 5 s, `.local` names on both sides |
   | Firefox, localhost | Firefox | one-time *Allow*, stopped before the invite | `.local` names on both sides, failed |
   | Firefox, localhost | Firefox | *Remember for all cameras* | real host address, connected |
