@@ -29,7 +29,7 @@ Each invite works once; the host's screen then shows a new one. *Invite* stays a
 
 ## Trying it
 
-- Locally: `npm start` prints a `localhost` URL for hosting from this computer. Browsers allow the camera only on https or localhost, and `?base=` makes the invite link point at the computer's network address. Phones join by scanning it; they don't need the page's camera.
+- Locally: `npm start` prints a `localhost` URL for hosting from this computer. Browsers allow the camera only on https or localhost, and `?base=` makes the invite link point at the computer's network address. Phones join by scanning it with their camera app. Their page is plain http on the network address, so *Scan the host's code* is hidden there; try it on the published site.
 - The published site is https, so any device can host there.
 - `?ice=stun:host:port` adds an ICE server. By default only the local network is tried.
 
@@ -46,16 +46,26 @@ Browsers replace a device's local address with a random `.local` name in what We
 
 - `npm test`: sessions over in-memory connections, covering a full series, the clock, early end, a dropped player rejoining, removal, and replaying numbers moves.
 - Headless Chrome, two isolated browser profiles on one machine, over real WebRTC: connect, play a round, see results, drop out and rejoin into the next round, including by scanning from the page with a fake camera. With camera permission the host's code carries its real address and the player's a `.local` name; 26 of 27 runs connected. Without it, both carry `.local` names, and one of three runs failed to connect.
-- Real devices on the home Wi-Fi:
-  - Chrome host on a Mac (localhost, camera allowed) with a Chrome phone: connected, real addresses on both sides.
-  - Same host with a Firefox phone: one attempt never opened (host `checking 0s → disconnected 15s`, phone stuck on `checking` with the host's real address), a later one connected.
-  - Firefox host on the Mac with a Firefox phone, camera turned off right after the one-time *Allow*: `.local` names on both sides, `failed` after 5 s. With *Remember for all cameras* ticked: the host showed its real address and they connected. On the published site, with a one-time *Allow* and the camera kept on while each invite is made: connected.
+- Real devices on the home Wi-Fi, a Mac hosting and an Android phone joining. Status lines as shown on the host:
+
+  | Host (Mac) | Phone | Host's camera | Result |
+  |---|---|---|---|
+  | Chrome, localhost | Chrome | one-time *Allow* | `connected`, real addresses on both sides |
+  | Chrome, localhost | Firefox | one-time *Allow* | first attempt `checking 0s → disconnected 15s` (phone stuck on `checking` with the host's real address); a later attempt connected |
+  | Firefox, localhost | Firefox | none | `failed` after 5 s, `.local` names on both sides |
+  | Firefox, localhost | Firefox | one-time *Allow*, stopped before the invite | `.local` names on both sides, failed |
+  | Firefox, localhost | Firefox | *Remember for all cameras* | real host address, connected |
+  | Firefox, published site | Firefox | one-time *Allow*, kept on while the invite is made | `new 0s → checking 0s → connected 0s · here: 192.168.0.37 · there: <name>.local` |
+
+  The last row shows the rule above: only the host's address is real, the phone's stays hidden, and that is enough.
+- On a phone, opening another tab during a game dropped the connection (Chrome, Android): the page in the background loses it. The way back is to rescan the host's code, which the host's screen then shows by itself.
 - Firefox 157 headless with a fake camera and `media.navigator.permission.disabled` kept the address hidden even while capturing, contradicting the source above; that setup probably doesn't count as capturing. Real devices are the reference.
 - Both screens show a status line during joining, e.g. `checking 0s → connected 2s · here: 192.168.1.39 · there: <name>.local`: the connection states with their timing, and each side's addresses.
 
 ## Open questions, in order
 
 1. Does Firefox ask for the camera again for each invite after a one-time *Allow*?
-2. iPhone ↔ Android, and routers that isolate devices from each other.
-3. Codes are about 600 characters, which makes dense QR codes. If phones struggle to scan them, keep only the parts of the offer WebRTC needs.
-4. Reloading the host's page ends the session.
+2. A phone hosting on the published site, with no computer.
+3. iPhone ↔ Android, and routers that isolate devices from each other.
+4. Codes are about 600 characters, which makes dense QR codes. If phones struggle to scan them, keep only the parts of the offer WebRTC needs.
+5. Reloading the host's page ends the session.
