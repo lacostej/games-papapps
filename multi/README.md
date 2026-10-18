@@ -57,7 +57,9 @@ Browsers replace a device's local address with a random `.local` name in what We
   | Firefox, localhost | Firefox | *Remember for all cameras* | real host address, connected |
   | Firefox, published site | Firefox | one-time *Allow*, kept on while the invite is made | `new 0s → checking 0s → connected 0s · here: 192.168.0.37 · there: <name>.local` |
 
-  The last row shows the rule above: only the host's address is real, the phone's stays hidden, and that is enough.
+  An Android phone hosting on the published site, with no computer, and another Android phone joining: connected.
+
+  The last row of the table shows the rule above: only the host's address is real, the phone's stays hidden, and that is enough.
 - On a phone, opening another tab during a game dropped the connection (Chrome, Android): the page in the background loses it. The way back is to rescan the host's code, which the host's screen then shows by itself.
 - Firefox 157 headless with a fake camera and `media.navigator.permission.disabled` kept the address hidden even while capturing, contradicting the source above; that setup probably doesn't count as capturing. Real devices are the reference.
 - Both screens show a status line during joining, e.g. `checking 0s → connected 2s · here: 192.168.1.39 · there: <name>.local`: the connection states with their timing, and each side's addresses.
@@ -65,7 +67,6 @@ Browsers replace a device's local address with a random `.local` name in what We
 ## Open questions, in order
 
 1. Does Firefox ask for the camera again for each invite after a one-time *Allow*?
-2. A phone hosting on the published site, with no computer.
-3. iPhone ↔ Android, and routers that isolate devices from each other.
-4. Codes are about 600 characters, which makes dense QR codes. If phones struggle to scan them, keep only the parts of the offer WebRTC needs.
-5. Reloading the host's page ends the session.
+2. iPhone ↔ Android, and routers that isolate devices from each other.
+3. Codes are about 600 characters, which makes dense QR codes. If phones struggle to scan them, keep only the parts of the offer WebRTC needs.
+4. Reloading the host's page ends the session.
