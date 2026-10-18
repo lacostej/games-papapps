@@ -5,6 +5,10 @@
 // Messages, player → host: { type: 'hello', id, name } · { type: 'submit', round, answer }
 //           host → player: { type: 'state', state } after every change, so a player who
 //           rejoins is up to date at once.
+//
+// Most games take one answer per player and score them at the end of the round. A live game
+// (live: true) applies every answer as it arrives with act(), scores it at once, and ends when
+// ended() says so; its players can be frozen for a while after a wrong answer.
 
 export class Host {
   #timer;
@@ -75,11 +79,31 @@ export class Host {
   view() {
     const round = this.phase === 'round' ? this.round : null;
     const step = round?.phases[round.step];
+    const rules = round && this.games[round.game];
+    const now = this.now();
     return {
       phase: this.phase,
       total: this.series.length,
-      players: [...this.players.values()].map((p) => ({ id: p.id, name: p.name, score: p.score, connected: Boolean(p.conn), answered: Boolean(p.answer) })),
-      round: round && { index: round.index, game: round.game, options: round.options, deal: round.deal, phase: step.name, open: Boolean(step.open), seconds: step.seconds, left: Math.max(0, round.endsAt - this.now()) },
+      players: [...this.players.values()].map((p) => ({
+        id: p.id,
+        name: p.name,
+        // A live round's points count at once.
+        score: p.score + (rules?.live ? (p.answer?.score ?? 0) : 0),
+        connected: Boolean(p.conn),
+        answered: !rules?.live && Boolean(p.answer),
+        ...(rules?.live && { found: p.answer?.found ?? 0, frozen: Math.max(0, (p.frozenUntil ?? 0) - now) }),
+      })),
+      round: round && {
+        index: round.index,
+        game: round.game,
+        options: round.options,
+        deal: rules.view ? rules.view(round.deal) : round.deal,
+        phase: step.name,
+        open: Boolean(step.open),
+        seconds: step.seconds,
+        left: step.seconds ? Math.max(0, round.endsAt - now) : null,
+        last: round.last ?? null,
+      },
       results: this.phase === 'round' ? null : this.results,
     };
   }
@@ -107,10 +131,31 @@ export class Host {
 
   #submit(player, { round, answer }) {
     const current = this.round;
-    if (this.phase !== 'round' || round !== current.index || player.answer || !current.phases[current.step].open) return;
+    if (this.phase !== 'round' || round !== current.index || !current.phases[current.step].open) return;
+    if (this.games[current.game].live) return this.#act(player, answer);
+    if (player.answer) return;
     player.answer = this.games[current.game].check(current.deal, answer);
     const connected = [...this.players.values()].filter((p) => p.conn);
     if (connected.every((p) => p.answer)) this.#finish();
+    else this.#broadcast();
+  }
+
+  // round.last tells every player what the latest answer did, e.g. to show who took the cards.
+  #act(player, answer) {
+    const round = this.round;
+    const rules = this.games[round.game];
+    if ((player.frozenUntil ?? 0) > this.now()) return;
+    const { deal, result, points = 0, freeze = 0 } = rules.act(round.deal, answer, round.options);
+    if (result === 'invalid') return;
+    round.deal = deal;
+    player.answer ??= { valid: true, score: 0, found: 0, wrong: 0 };
+    player.answer.score += points;
+    if (result === 'found') player.answer.found++;
+    if (result === 'wrong') player.answer.wrong++;
+    if (freeze) player.frozenUntil = this.now() + freeze;
+    round.last = { seq: (round.last?.seq ?? 0) + 1, id: player.id, name: player.name, answer, result };
+    const players = [...this.players.values()].map((p) => ({ found: p.answer?.found ?? 0 }));
+    if (rules.ended(round.deal, round.options, players)) this.#finish();
     else this.#broadcast();
   }
 
@@ -123,15 +168,21 @@ export class Host {
     const { game, options } = this.series[index];
     const rules = this.games[game];
     this.round = { index, game, options, deal: rules.deal(options, this.random), phases: rules.phases(options), step: 0 };
-    for (const p of this.players.values()) p.answer = null;
+    for (const p of this.players.values()) {
+      p.answer = null;
+      p.frozenUntil = 0;
+    }
     this.phase = 'round';
     this.#schedule();
   }
 
+  // A phase with no seconds lasts until the game or the host ends it.
   #schedule() {
     const { seconds } = this.round.phases[this.round.step];
-    this.round.endsAt = this.now() + seconds * 1000;
-    this.#timer = setTimeout(() => this.#advance(), seconds * 1000);
+    if (seconds) {
+      this.round.endsAt = this.now() + seconds * 1000;
+      this.#timer = setTimeout(() => this.#advance(), seconds * 1000);
+    }
     this.#broadcast();
   }
 
@@ -144,10 +195,12 @@ export class Host {
 
   #finish() {
     clearTimeout(this.#timer);
-    const { index, game, deal } = this.round;
+    const { index, game } = this.round;
+    const rules = this.games[game];
+    const deal = rules.view ? rules.view(this.round.deal) : this.round.deal;
     const answers = [...this.players.values()].map((p) => ({ id: p.id, name: p.name, ...(p.answer ?? { valid: false, score: 0, missing: true }) }));
     for (const p of this.players.values()) p.score += p.answer?.score ?? 0;
-    this.results = { index, game, deal, answers, ...this.games[game].summary(deal) };
+    this.results = { index, game, deal, answers, ...rules.summary(this.round.deal) };
     this.phase = 'results';
     this.#broadcast();
   }

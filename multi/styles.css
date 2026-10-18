@@ -33,6 +33,7 @@ textarea.code { width: 100%; font: 12px/1.3 ui-monospace, monospace; resize: non
 
 .settings { width: 100%; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .settings select { width: 100%; }
+.settings.single { grid-template-columns: minmax(0, 1fr); }
 .settings .check { flex-direction: row; align-items: center; gap: 8px; grid-column: 1 / -1; font-size: 15px; color: var(--ink); }
 .settings .check input { width: 20px; height: 20px; }
 
@@ -50,3 +51,18 @@ textarea.code { width: 100%; font: 12px/1.3 ui-monospace, monospace; resize: non
 .roster li.answered { color: var(--good); font-weight: 600; }
 .roster li.answered::after { content: ' ✓'; }
 .diag { margin: 0; font: 11px/1.4 ui-monospace, monospace; color: var(--muted); text-align: center; overflow-wrap: anywhere; -webkit-user-select: text; user-select: text; }
+
+/* Trio: the shared table fills the height left, like the solo game, so every card stays on screen. */
+.multi .timer > span { width: auto; min-width: 2ch; }
+.games { display: flex; gap: 8px; }
+.games .selected { outline: 2px solid var(--ink); outline-offset: -2px; }
+.stage.trio-stage { overflow: hidden; gap: 8px; padding-bottom: 0; }
+.trio-table { flex: 1; min-height: 0; width: 100%; max-width: 460px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(var(--rows), minmax(0, 1fr)); gap: 8px; }
+.trio-table .card:disabled { opacity: 1; cursor: default; }
+.trio-table.frozen .card { opacity: 0.5; }
+.trio-status { margin: 0; min-height: 1.4em; text-align: center; font-size: 14px; color: var(--muted); }
+.trio-status.good { color: var(--good); font-weight: 700; }
+.trio-status.bad { color: var(--bad); font-weight: 600; }
+.scores-line { margin: 0; }
+.scores-line .me { color: var(--ink); font-weight: 700; }
+.scores-line .extra { color: var(--muted); }

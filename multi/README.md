@@ -1,19 +1,25 @@
 # Play together (proof of concept)
 
-Several devices play the same numbers round. One device hosts and can play too; the others join by scanning its QR code. No server: the devices talk to each other over WebRTC on the local network.
+Several devices play the same game: a numbers round, or a Trio race on one shared table. The host picks the game on the start page (or with `?game=trio`). One device hosts and can play too; the others join by scanning its QR code. No server: the devices talk to each other over WebRTC on the local network.
 
 ## Layers
 
 | Layer | Files | Knows about |
 |---|---|---|
-| Games | `src/games/` | one game's rules: `defaults`, `phases(options)`, `deal(options, random)`, `check(deal, answer)`, `summary(deal)` |
+| Games | `src/games/` | one game's rules: `defaults`, `phases(options)`, `deal(options, random)`, `check(deal, answer)`, `summary(deal)`; a live game has `act(deal, answer, options)` and `ended(deal, options, players)` instead of `check`, and `view(deal)` for what players may see |
 | Session | `src/core/session.js` | players, series, clock, scores. `Host` decides everything; `Player` sends its name and answers |
 | Connection | `src/core/memory.js`, `src/net/lan.js` | moving JSON messages. Both give a listener with `onconnection(conn)` and conns with `send`, `close`, `onmessage`, `onclose` |
 | Page | `src/ui/` | screens, QR codes, the camera |
 
 The host sends its whole public state after every change, so a player who rejoins is up to date at once. Each device keeps a random id in `localStorage`; joining again with the same id takes back the same seat and score.
 
-A series is a list such as `[{ game: 'numbers', options: { level: 'kids', think: 30, answer: 45 } }, …]`. Mixing games means adding a module to `src/games/` and its screen to the page.
+A series is a list such as `[{ game: 'numbers', options: { level: 'kids', think: 30, answer: 45 } }, …]`. The page runs one game per series; a new game is a module in `src/games/` and its screen in the page.
+
+## Trio
+
+Everyone sees the same table. A claim names its three cards, and the first valid one to reach the host scores a point; the host replaces the cards and every table updates. A claim for cards someone just took comes back *too late*, with no penalty, and cards another player took drop out of your selection. The host's own seat has no network delay, a few milliseconds less than the phones on the Wi-Fi.
+
+The host chooses when the round ends (after 2, 3 or 5 minutes, first to 5 or 10 trios, or when the deck is empty) and what a wrong trio costs (3 seconds without claiming, a point, or nothing). The deck's order stays on the host. Rules and cards come from `trio/` (`src/core/trio.js`, `src/ui/cards.js`, `cards.css`).
 
 A connection over the internet would be one more file next to `lan.js`, for example a WebSocket relay giving the same listener and conn shape. Nothing above it changes.
 
@@ -44,8 +50,9 @@ Browsers replace a device's local address with a random `.local` name in what We
 
 ## Checked so far
 
-- `multi/e2e/`: headless Chrome scripts, two isolated profiles over real WebRTC. Serve the repo on :8791 (`npm start -- 8791`), then `GRANT=1 node multi/e2e/numbers.mjs <outDir>` (or `scan.mjs`); `GRANT=1` allows the host's camera. Not part of `npm test`: they need Chrome.
-- `npm test`: sessions over in-memory connections, covering a full series, the clock, early end, a dropped player rejoining, removal, and replaying numbers moves.
+- `multi/e2e/`: headless Chrome scripts, two isolated profiles over real WebRTC. Serve the repo on :8791 (`npm start -- 8791`), then `GRANT=1 node multi/e2e/numbers.mjs <outDir>` (or `scan.mjs`, `trio.mjs`); `GRANT=1` allows the host's camera. Not part of `npm test`: they need Chrome.
+- `npm test`: sessions over in-memory connections, covering a full series, the clock, early end, a dropped player rejoining, removal, and replaying numbers moves; for Trio, first claim wins, too late, each penalty, each way of ending, and points kept on rejoining.
+- `trio.mjs`: the same table on both devices, a claim updating both, the host and a player claiming the same trio at once (the player gets *too late*), a wrong claim's freeze ignoring claims for 3 s, and the round ending at first to 5; English and French, 320 and 375 px wide, light and dark.
 - Headless Chrome, two isolated browser profiles on one machine, over real WebRTC: connect, play a round, see results, drop out and rejoin into the next round, including by scanning from the page with a fake camera. With camera permission the host's code carries its real address and the player's a `.local` name; 26 of 27 runs connected. Without it, both carry `.local` names, and one of three runs failed to connect.
 - Real devices on the home Wi-Fi, a Mac hosting and an Android phone joining. Status lines as shown on the host:
 
