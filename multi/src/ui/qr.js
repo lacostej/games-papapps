@@ -18,7 +18,8 @@ export async function scan(video, onCode) {
   video.srcObject = stream;
   video.setAttribute('playsinline', '');
   video.muted = true;
-  await video.play();
+  // Not awaited: a video that isn't on the page yet may never start; render() plays it once shown.
+  video.play().catch(() => {});
   const read = await reader();
   let running = true;
   const loop = async () => {
