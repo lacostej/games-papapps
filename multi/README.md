@@ -44,6 +44,7 @@ Browsers replace a device's local address with a random `.local` name in what We
 
 ## Checked so far
 
+- `multi/e2e/`: headless Chrome scripts, two isolated profiles over real WebRTC. Serve the repo on :8791 (`npm start -- 8791`), then `GRANT=1 node multi/e2e/numbers.mjs <outDir>` (or `scan.mjs`); `GRANT=1` allows the host's camera. Not part of `npm test`: they need Chrome.
 - `npm test`: sessions over in-memory connections, covering a full series, the clock, early end, a dropped player rejoining, removal, and replaying numbers moves.
 - Headless Chrome, two isolated browser profiles on one machine, over real WebRTC: connect, play a round, see results, drop out and rejoin into the next round, including by scanning from the page with a fake camera. With camera permission the host's code carries its real address and the player's a `.local` name; 26 of 27 runs connected. Without it, both carry `.local` names, and one of three runs failed to connect.
 - Real devices on the home Wi-Fi, a Mac hosting and an Android phone joining. Status lines as shown on the host:
