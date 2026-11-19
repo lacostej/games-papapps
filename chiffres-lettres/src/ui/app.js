@@ -346,12 +346,7 @@ function renderNumbers() {
     return [
       target,
       el('div', { className: 'plates' }, ...round.plates.map((p) => el('span', { className: 'plate' }, String(p)))),
-      el(
-        'div',
-        { className: 'choices' },
-        button(t('hint'), revealHint, 'big', undefined, round.hint?.shape !== undefined),
-        button(t('answer'), () => toAnswer(), 'big primary'),
-      ),
+      el('div', { className: 'choices' }, button(t('answer'), () => toAnswer(), 'big primary')),
     ];
   }
   if (round.phase === 'answer') {
@@ -404,6 +399,7 @@ function renderNumbers() {
           round.error = false;
           render();
         }, '', undefined, !calc.steps.length),
+        round.timeUp ? button(t('hint'), revealHint, '', undefined, round.hint?.shape !== undefined) : '',
         // Disabled until a card is tapped, so a tap meant for Answer as time runs out can't announce.
         button(t('announce', { value: t.number(value) }), submitNumbers, 'primary', undefined, !round.touched),
       ),
