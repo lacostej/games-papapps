@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { combine, describe, fromMoves, fromSteps, solutions } from '../src/core/methods.js';
+import { combine, describe, fromMoves, fromSteps, hintShape, solutions } from '../src/core/methods.js';
 import { Calculation } from '../src/core/numbers.js';
 
 const card = (v) => fromMoves([v], [], v);
@@ -57,4 +57,10 @@ test('moves made after an undo replay to the same numbers', () => {
 
 test('a save naming a number that was never made gives no answer instead of failing', () => {
   assert.equal(fromMoves(PLATES, [[4, '×', 3], [7, '-', 0]], 243), undefined);
+});
+
+test("the hint shows the first solution's last step with its digits hidden", () => {
+  assert.equal(solutions(PLATES, 187)[0].last, '250 − 63');
+  assert.equal(hintShape(PLATES, 187), '□□□ − □□');
+  assert.equal(hintShape([7, 9, 4, 4, 5, 3], 171), '□□ × □');
 });

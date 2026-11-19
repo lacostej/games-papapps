@@ -176,6 +176,7 @@ main {
 .target span { color: var(--muted); font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; }
 .target b { font-size: clamp(44px, 16vw, 64px); line-height: 1; font-variant-numeric: tabular-nums; }
 .target.small b { font-size: 36px; }
+.target .clue { margin-top: 6px; color: var(--ink); font-size: 15px; text-transform: none; letter-spacing: 0.04em; }
 
 .plates {
   width: 100%;

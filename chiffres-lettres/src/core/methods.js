@@ -107,6 +107,12 @@ export function solutions(plates, target) {
   return [...found.values()].sort((x, y) => x.ops - y.ops).map(describe);
 }
 
+// The last step of the first solution reaching `value`, digits hidden: "□□□ − □□".
+export function hintShape(plates, value) {
+  const [first] = solutions(plates, value);
+  return first.last.replace(/\d+/g, (n) => '□'.repeat(n.length));
+}
+
 // The player's answer: moves by number id ([aId, op, bId], ids as in Calculation), ending on the
 // announced value. The latest number with that value is the one announced.
 export function fromMoves(plates, moves, value) {

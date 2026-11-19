@@ -1,6 +1,7 @@
 import { pickUiLanguage, translateDom, translator, WORD_LANGUAGES } from './i18n.js';
 import { bestWords, canSpell, commonFirst, drawLetter, LETTER_COUNTS } from '../core/letters.js';
 import { Calculation, drawNumbers, LEVELS, numbersScore, OPS, solve } from '../core/numbers.js';
+import { hintShape } from '../core/methods.js';
 import { lettersScore, MODES, ROUND_SECONDS, roundKind } from '../core/session.js';
 
 const STORAGE_KEY = 'chiffres-lettres';
@@ -322,13 +323,35 @@ function renderLetters() {
 
 // Numbers -----------------------------------------------------------------------------
 
+// First tap: how close the best answer gets. Second: the shape of its last step.
+function revealHint() {
+  const hint = (round.hint ??= {});
+  if (hint.best === undefined) hint.best = solve(round.plates, round.target).value;
+  else hint.shape ??= hintShape(round.plates, hint.best);
+  render();
+}
+
+function hintText() {
+  const { best, shape } = round.hint ?? {};
+  if (best === undefined) return '';
+  const away = Math.abs(best - round.target);
+  const distance = away ? t('away', { count: away }) : t('hintExact');
+  return [t('hintBest', { distance }), shape].filter(Boolean).join(' · ');
+}
+
 function renderNumbers() {
-  const target = el('div', { className: 'target' }, el('span', {}, t('target')), el('b', {}, String(round.target)));
+  const clue = round.phase === 'result' ? '' : hintText();
+  const target = el('div', { className: 'target' }, el('span', {}, t('target')), el('b', {}, String(round.target)), clue ? el('span', { className: 'clue' }, clue) : '');
   if (round.phase === 'think') {
     return [
       target,
       el('div', { className: 'plates' }, ...round.plates.map((p) => el('span', { className: 'plate' }, String(p)))),
-      el('div', { className: 'choices' }, button(t('answer'), () => toAnswer(), 'big primary')),
+      el(
+        'div',
+        { className: 'choices' },
+        button(t('hint'), revealHint, 'big', undefined, round.hint?.shape !== undefined),
+        button(t('answer'), () => toAnswer(), 'big primary'),
+      ),
     ];
   }
   if (round.phase === 'answer') {
