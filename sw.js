@@ -14,7 +14,7 @@ self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim(
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET' || new URL(request.url).origin !== self.location.origin) return;
-  const network = fetch(request);
+  const network = fetch(request, { cache: 'no-cache' });
   // Cloned as soon as the response arrives, before the page can read the body.
   const stored = network.then((response) => {
     if (!response.ok) return;
